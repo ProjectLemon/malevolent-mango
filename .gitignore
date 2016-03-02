@@ -24,5 +24,7 @@ _testmain.go
 *.test
 *.prof
 
-#Mac
+# Mac
 .DS_Store
+# Windows
+Thumbs.db
