@@ -19,22 +19,25 @@ type DatabaseInterface struct {
 }
 
 //SetConfigurations reads the specified config file
-//and sets the respective fields
+//and sets the respective fields in the DatabaseInterface
 func (dbi *DatabaseInterface)SetConfigurations(f *os.File) {
     cnf := make(map[string]string)
     
     scanner := bufio.NewScanner(f)
     for scanner.Scan() {
-        insert := strings.SplitAfter(scanner.Text(), " ")
-        cnf[insert[0]] = insert[1]
+        if data := scanner.Text(); strings.Contains(data, " ") {
+            insert := strings.Split(data, " ")
+            cnf[insert[0]] = insert[1]   
+        }
     }
-    dbi.User = cnf["User "]
-    dbi.Password = cnf["Password "]
-    dbi.DriverName = cnf["DriverName "]
-    dbi.DataSourceName = cnf["DataSourceName "]
+    dbi.User = cnf["User"]
+    dbi.Password = cnf["Password"]
+    dbi.DriverName = cnf["DriverName"]
+    dbi.DataSourceName = cnf["DataSourceName"]
 }
 
-//OpenConnection connects to a database using the DatabaseInterface
+//OpenConnection connects to a database using the information
+//provided in DatabaseInterface
 func (dbi *DatabaseInterface)OpenConnection() error {
     db, err := sql.Open(dbi.DriverName, dbi.getConnectionString())
     if err != nil {

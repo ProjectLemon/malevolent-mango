@@ -3,7 +3,6 @@ package main
 import (
     "net/http"
     "fmt"
-    "log"
     "os"
 )
 
@@ -29,7 +28,7 @@ func connectToDatabase()  {
     err = db.OpenConnection()
     if err != nil {
         fmt.Println("Failed to connect to database with error:")
-        log.Fatal(err)
+        fmt.Println(err)
         fmt.Println("Continuing without database")
         _useDb = false
         return
