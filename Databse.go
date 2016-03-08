@@ -27,13 +27,13 @@ func (dbi *DatabaseInterface)SetConfigurations(f *os.File) {
     for scanner.Scan() {
         if data := scanner.Text(); strings.Contains(data, " ") {
             insert := strings.Split(data, " ")
-            cnf[insert[0]] = insert[1]   
+            cnf[strings.ToUpper(insert[0])] = insert[1]   
         }
     }
-    dbi.User = cnf["User"]
-    dbi.Password = cnf["Password"]
-    dbi.DriverName = cnf["DriverName"]
-    dbi.DataSourceName = cnf["DataSourceName"]
+    dbi.User = cnf["USER"]
+    dbi.Password = cnf["PASSWORD"]
+    dbi.DriverName = cnf["DRIVERNAME"]
+    dbi.DataSourceName = cnf["DATASOURCENAME"]
 }
 
 //OpenConnection connects to a database using the information
