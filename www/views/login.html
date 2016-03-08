@@ -1,0 +1,7 @@
+<form name="login" class="login-form">
+  <div class="email-form" ng-class="{error: login.name.$invalid && !login.name.$pristine}">
+    <label>E-mail:</label>
+    <input type="text" name="email" ng-model="LoginController.project.name" required>
+    <span class="help-inline">Required</span>
+  </div>
+</form>
