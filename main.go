@@ -10,7 +10,27 @@ var _useDb = true
 
 func main() {
     connectToDatabase()
+    http.HandleFunc("/login", login)
+    http.HandleFunc("/logout", logout)
+    http.HandleFunc("/register", register)
 	http.ListenAndServe(":8080", http.FileServer(http.Dir("www")))
+}
+
+func login(w http.ResponseWriter, r *http.Request)  {
+    //Get posted info
+    //Lookup in database
+    //Log in or deny
+}
+
+func logout(w http.ResponseWriter, r *http.Request)  {
+    //Validate posted info in database
+    //Clear session
+}
+
+func register(w http.ResponseWriter, r *http.Request)  {
+    //Validate input
+    //Add to database 
+    //Login
 }
 
 func connectToDatabase()  {
