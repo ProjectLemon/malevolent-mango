@@ -51,6 +51,11 @@ func (dbi *DatabaseInterface)OpenConnection() error {
     return nil;
 }
 
+//CloseConnection closes any active connection to the current database
+func (dbi *DatabaseInterface)CloseConnection() {
+    dbi.DB.Close()
+}
+
 //getConnectionString returns the connection details as a formated dataSourceName
 func (dbi *DatabaseInterface)getConnectionString() string {
     return dbi.User+":"+dbi.Password+"@"+dbi.DataSourceName
