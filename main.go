@@ -12,6 +12,8 @@ var _useDb = true
 var db *DatabaseInterface //in order to close on exit
 
 func main() {
+    port := "8080"
+    
     if runtime.GOOS == "windows" {
         c := exec.Command("cls")
         c.Stdout = os.Stdout
@@ -25,12 +27,14 @@ func main() {
     //Setup back-end
     db = connectToDatabase()
     go commandLineInterface()
+    fmt.Println("Server is running!")
+    fmt.Println("Listening on PORT: "+port)
 
     //Setup client interface    
     http.HandleFunc("/login", login)
     http.HandleFunc("/logout", logout)
     http.HandleFunc("/register", register)
-	http.ListenAndServe(":8080", http.FileServer(http.Dir("www")))
+	http.ListenAndServe(":"+port, http.FileServer(http.Dir("www")))
 }
 
 func login(w http.ResponseWriter, r *http.Request)  {
