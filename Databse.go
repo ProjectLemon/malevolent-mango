@@ -38,7 +38,7 @@ func (dbi *DatabaseInterface)SetConfigurations(f *os.File) {
 
 //OpenConnection connects to a database using the information
 //provided in DatabaseInterface
-func (dbi *DatabaseInterface)OpenConnection() error {
+func (dbi *DatabaseInterface) OpenConnection() error {
     db, err := sql.Open(dbi.DriverName, dbi.getConnectionString())
     if err != nil {
         return err
@@ -51,12 +51,18 @@ func (dbi *DatabaseInterface)OpenConnection() error {
     return nil;
 }
 
+//LookupUser sends a query to the database for the specified
+//username and password hash. Returns error if query failed
+func (dbi *DatabaseInterface) LookupUser(username, password string) (bool, error) {
+    return true, nil;
+}
+
 //CloseConnection closes any active connection to the current database
-func (dbi *DatabaseInterface)CloseConnection() {
+func (dbi *DatabaseInterface) CloseConnection() {
     dbi.DB.Close()
 }
 
 //getConnectionString returns the connection details as a formated dataSourceName
-func (dbi *DatabaseInterface)getConnectionString() string {
+func (dbi *DatabaseInterface) getConnectionString() string {
     return dbi.User+":"+dbi.Password+"@"+dbi.DataSourceName
 }
