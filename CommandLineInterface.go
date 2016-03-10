@@ -24,6 +24,7 @@ func commandLineInterface() {
 }
 
 func handle(input string)  {
+	fmt.Println(input)
     switch input {
     case "help":
         printCommands()
