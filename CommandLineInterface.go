@@ -18,19 +18,20 @@ func commandLineInterface() {
         fmt.Print("mango> ")
         text, _ := reader.ReadString('\n')
         text = strings.ToLower(text)
+        text = strings.Replace(text, "\n", "", -1)
         handle(text)
     }
 }
 
 func handle(input string)  {
     switch input {
-    case "help\n":
+    case "help":
         printCommands()
         break
-    case "quit\n":
+    case "quit":
         closeServer()
         break
-    case "exit\n":
+    case "exit":
         closeServer()
         break
     default:
