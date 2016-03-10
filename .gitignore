@@ -33,3 +33,6 @@ Thumbs.db
 .db_cnf
 .vscode/*
 debug
+
+# Sass
+.sass-cache
