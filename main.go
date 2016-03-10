@@ -34,7 +34,8 @@ func main() {
     http.HandleFunc("/login", login)
     http.HandleFunc("/logout", logout)
     http.HandleFunc("/register", register)
-	http.ListenAndServe(":"+port, http.FileServer(http.Dir("www")))
+    http.Handle("/", http.FileServer(http.Dir("www")))
+	http.ListenAndServe(":"+port, nil)
 }
 
 func login(w http.ResponseWriter, r *http.Request)  {
