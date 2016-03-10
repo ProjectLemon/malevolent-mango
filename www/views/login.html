@@ -1,7 +1,13 @@
 <form name="login" class="login-form">
   <div class="email-form" ng-class="{error: login.name.$invalid && !login.name.$pristine}">
     <label>E-mail:</label>
-    <input type="text" name="email" ng-model="LoginController.project.name" required>
+    <input placeholder="E-mail" type="email" name="email" ng-model="string" required>
+    <span class="help-inline">Required</span>
+  </div>
+  
+  <div class="password-form" ng-class="{error: login.name.$invalid && !login.name.$pristine}">
+    <label>Password:</label>
+    <input placeholder="Password" type="password" name="password" ng-model="LoginController.project.name" required>
     <span class="help-inline">Required</span>
   </div>
 </form>
