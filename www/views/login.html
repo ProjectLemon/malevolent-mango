@@ -12,8 +12,7 @@
     <div class="password-form">
       <label>Password:</label>
       <input placeholder="Password" type="password" name="password" ng-model="user.password" required>
-      <span class="error" ng-show="login.email.$error.required">Required!</span>
-      <span class="error" ng-show="login.email.$error.email">Not valid email!</span>
+      <span class="error" ng-show="login.password.$error.required">Required!</span>
     </div>
     
     <input type="submit" value="Login">

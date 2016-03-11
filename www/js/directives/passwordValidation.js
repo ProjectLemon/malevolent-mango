@@ -1,3 +1,5 @@
+/* In development, so far just a copy paste */
+
 app.directive('passwordValidation', function() {
    return {
       require: 'ngModel',
