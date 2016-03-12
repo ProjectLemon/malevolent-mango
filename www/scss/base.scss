@@ -1,0 +1,131 @@
+/****************************************************
+ *
+ * These are the basic styling among common elements
+ * 
+ ****************************************************/
+
+/**
+ * Reset some basic elements
+ */
+html, body, div, span, object, ifram, h1, h2, h3, h4, h5, h6,
+p, blockquote, pre, a, img, form, table, time, canvas, header,
+meny, nav, section, audio, video, dl, dd, ol, ul, figure, blockquote {
+  border:0;
+  font-size:100%;
+  vertical-align:baseline;
+  margin:0;
+  padding:0
+}
+article, aside, details, figcaption, figure, footer, header,
+hgroup, menu, nav, section{
+  display:block
+}
+body {
+  line-height:1
+}
+table {
+  border-collapse:collapse;
+  border-spacing:0
+}
+
+
+/**
+ * Basic Styling
+ */
+html {
+  font-size: 62.5%; // makes 1.2rem correspond to 12pt
+}
+body {
+  font-family: $font-family-body;
+  font-size: $font-size-base;
+  color: $text-color-dark;
+  background-color: $background-color;
+}
+.box {
+  border-radius: .6rem;
+  min-height: 3em;
+}
+
+/**
+ * Text
+ */
+
+h1 {
+  font-size: $font-size-large;
+}
+
+
+/**
+ * Links
+ */
+a {
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+
+/**
+ * Buttons
+ */
+.button-large {
+  border-radius: .7rem;
+  border: 0;
+  background-color: $background-color;
+  font-family: $font-family-body;
+  font-size: $font-size-medium;
+  padding: .8em 4em;
+  color: $text-color-dark;
+  box-shadow: 0 .4rem 1.5rem rgba(0, 0, 0, .17);
+  
+  -webkit-transition: background-color .1s; /* Safari */
+  transition: background-color .1s;
+  
+  &:hover {
+    background-color: lighten($background-color, 3%);
+  }
+  &:active {
+    background-color: lighten($background-color, 10%);
+  }
+}
+
+
+/**
+ * Icons
+ */
+.icon {
+  height: 1em;
+  width: 1em;
+  vertical-align: top;
+
+  > svg {
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+    vertical-align: top;
+
+    path {
+      fill: $text-color-dark;
+    }
+  }
+}
+.icon-white > svg path {
+  fill: $text-color-light;
+}
+
+
+/**
+ * Animations
+ */
+.fade-in.ng-enter {
+  transition: .5s linear all;
+  opacity: 0;
+}
+
+.fade-in.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+
+

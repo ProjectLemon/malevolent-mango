@@ -1,6 +1,6 @@
 
 app.controller('LoginController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
-  $scope.user = {email:"testing@example.com", password:"supersecret"};
+  $scope.user = {};
   $scope.message = '';
   $scope.submit = function () {
     /* If form is filled out, send data to server */
@@ -22,7 +22,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             */
           
             $window.sessionStorage.token = response.data.token;
-            $scope.message = 'Welcome';
+            $scope.message = 'Logged in';
           },
           /* On error */
           function (response) {
@@ -34,6 +34,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
           }
         );
     } else {
+      $scope.formNotFilled = true; // to signify to form
       $scope.message = 'Please fill out the form correctly';
     }
   };

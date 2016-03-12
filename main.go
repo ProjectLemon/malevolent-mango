@@ -64,7 +64,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println("Header: ", r.Header)
 	//fmt.Println("Body: ", user)
 
-	if user.Email == "testing@example.com" && user.Password == "supersecret" {
+	if user.Email == "testing@example.com" && user.Password == "secret" {
 		w.Write([]byte("{\"token\":\"Token\"}"))
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
