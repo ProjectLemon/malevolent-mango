@@ -61,7 +61,7 @@ func (dbi *DatabaseInterface) OpenConnection() error {
 //LookupUser sends a query to the database for the specified
 //username and password hash. Returns error if query failed
 func (dbi *DatabaseInterface) LookupUser(user *User) (bool, error) {
-	rows, err := dbi.DB.Query("select * from Users where EMail = '" + user.Email.String + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = '" + user.Email.String + "'")
 	if err != nil {
 		fmt.Println(err)
 	}
