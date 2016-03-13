@@ -45,11 +45,7 @@ func main() {
 	fmt.Println("Listening on PORT: " + port)
 
 	//New user for exemple
-	user := new(User)
-	user.Email.String = "linus.lagerhjelm@gmail.com"
-	user.FullName.String = ""
-	user.PasswordHash.String = ""
-	user.Salt.String = ""
+	user := NewUser("linus.lagerhjelm@gmail.com")
 	db.LookupUser(user)
 
 	//Setup client interface
