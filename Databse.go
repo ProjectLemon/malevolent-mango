@@ -84,6 +84,18 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (bool, error) {
 	return false, ErrNoUserFound
 }
 
+//AddUser insersts the specified user into the database
+//returns error where err == nil if everything went okay
+func (dbi *DatabaseInterface) AddUser(user *User) error {
+	_, err := dbi.DB.Exec(
+		"INSERT INTO Users (EMail, FullName, Password, PasswordSalt) VALUES (?,?,?,?)",
+		user.Email.String,
+		user.FullName.String,
+		user.PasswordHash.String,
+		user.Salt.String)
+	return err
+}
+
 //CloseConnection closes any active connection to the current database
 func (dbi *DatabaseInterface) CloseConnection() {
 	dbi.DB.Close()
