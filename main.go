@@ -57,9 +57,16 @@ func main() {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	//Get posted info
-	//Lookup in database
-	//Log in or deny
+	credentials := NewUser(r.PostFormValue("email"))
+	user, err := db.LookupUser(credentials)
+	if err != nil {
+		http.FileServer(http.Dir("www"))
+		return
+	}
+	allowed := authenticate(user)
+	if allowed {
+		http.FileServer(http.Dir("www")) //temporary line
+	}
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
@@ -83,6 +90,10 @@ func register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Log")
 	}
+}
+
+func authenticate(user *User) bool {
+	return true
 }
 
 func connectToDatabase() *DatabaseInterface {
