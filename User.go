@@ -5,10 +5,10 @@ import "database/sql"
 //User provides a datatype for gathering the user information
 //for the current user.
 type User struct {
-	Email        sql.NullString
-	FullName     sql.NullString
-	PasswordHash sql.NullString
-	Salt         sql.NullString
+	Email    sql.NullString
+	FullName sql.NullString
+	Password sql.NullString
+	Salt     sql.NullString
 }
 
 //NewUser creates a new instance of a user type

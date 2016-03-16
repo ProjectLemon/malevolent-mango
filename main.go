@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -44,10 +46,6 @@ func main() {
 	fmt.Println("Server is running!")
 	fmt.Println("Listening on PORT: " + port)
 
-	//New user for exemple
-	user := NewUser("linus.lagerhjelm@gmail.com")
-	db.LookupUser(user)
-
 	//Setup client interface
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout", logout)
@@ -57,15 +55,25 @@ func main() {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	credentials := NewUser(r.PostFormValue("email"))
-	user, err := db.LookupUser(credentials)
+
+	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		http.FileServer(http.Dir("www"))
 		return
 	}
+	var user *User
+
+	err = json.Unmarshal(body, user)
+	user, err = db.LookupUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	allowed := authenticate(user)
 	if allowed {
-		http.FileServer(http.Dir("www")) //temporary line
+		w.Write([]byte("{\"token\":\"Token\"}"))
 	}
 }
 
@@ -94,6 +102,36 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 func authenticate(user *User) bool {
 	return true
+	//Get posted info
+	//Lookup in database
+	//Log in or deny
+
+	/* I'm just testing the login on client, remove this
+	   when you actually implement the login /Fredrik */
+
+	//body, err := ioutil.ReadAll(r.Body)
+
+	//if err != nil {
+	//	fmt.Fprintf(w, "%s", err)
+	//}
+
+	//type User struct {
+	//	Email    string
+	//	Password string
+	//}
+	//var user User
+	//err = json.Unmarshal(body, &user)
+
+	//fmt.Println("Header: ", r.Header)
+	//fmt.Println("Body: ", user)
+
+	/*if user.Email == "testing@example.com" && user.Password == "secret" {
+		w.Write([]byte("{\"token\":\"Token\"}"))
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Wrong email or password"))
+	}*/
+	/* End of testing */
 }
 
 func connectToDatabase() *DatabaseInterface {
