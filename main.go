@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -50,9 +51,9 @@ func main() {
 	db.LookupUser(user)
 
 	//Setup client interface
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/logout", logout)
-	http.HandleFunc("/register", register)
+	http.HandleFunc("/api/login", login)
+	http.HandleFunc("/api/logout", logout)
+	http.HandleFunc("/api/register", register)
 	http.Handle("/", http.FileServer(http.Dir("www")))
 	http.ListenAndServe(":"+port, nil)
 }
@@ -121,36 +122,6 @@ func register(w http.ResponseWriter, r *http.Request) {
 
 func authenticate(user *User) bool {
 	return true
-	//Get posted info
-	//Lookup in database
-	//Log in or deny
-
-	/* I'm just testing the login on client, remove this
-	   when you actually implement the login /Fredrik */
-
-	//body, err := ioutil.ReadAll(r.Body)
-
-	//if err != nil {
-	//	fmt.Fprintf(w, "%s", err)
-	//}
-
-	//type User struct {
-	//	Email    string
-	//	Password string
-	//}
-	//var user User
-	//err = json.Unmarshal(body, &user)
-
-	//fmt.Println("Header: ", r.Header)
-	//fmt.Println("Body: ", user)
-
-	/*if user.Email == "testing@example.com" && user.Password == "secret" {
-		w.Write([]byte("{\"token\":\"Token\"}"))
-	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Wrong email or password"))
-	}*/
-	/* End of testing */
 }
 
 func connectToDatabase() *DatabaseInterface {
