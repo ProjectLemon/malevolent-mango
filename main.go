@@ -23,7 +23,7 @@ var (
 	//unneccesairy calls to the sql api
 	db *DatabaseInterface
 
-	_useDb     = true       //Flag to see if we are able to use a database
+	//_useDb     = true       //Flag to see if we are able to use a database
 	_startTime = time.Now() //Last restart
 )
 
@@ -46,6 +46,9 @@ func main() {
 	fmt.Println("Server is running!")
 	fmt.Println("Listening on PORT: " + port)
 
+	user := NewUser("linussss")
+	db.LookupUser(user)
+
 	//Setup client interface
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout", logout)
@@ -56,18 +59,34 @@ func main() {
 
 func login(w http.ResponseWriter, r *http.Request) {
 
+	//Read json from client
 	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
 	if err != nil {
 		http.FileServer(http.Dir("www"))
 		return
 	}
-	var user *User
+	user := new(User)
 
+	//Parse json into User struct
 	err = json.Unmarshal(body, user)
-	user, err = db.LookupUser(user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(err.Error()))
+		return
+	}
+
+	//See if user is in database
+	if db != nil {
+		user, err = db.LookupUser(user)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(err.Error()))
+			return
+		}
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("No database present"))
 		return
 	}
 
@@ -137,7 +156,7 @@ func authenticate(user *User) bool {
 func connectToDatabase() *DatabaseInterface {
 	conf, err := os.Open(".db_cnf")
 	if err != nil {
-		_useDb = false
+		db = nil
 		fmt.Println("No database config file detected")
 		fmt.Println("Continuing without database")
 		return nil
@@ -151,7 +170,7 @@ func connectToDatabase() *DatabaseInterface {
 		fmt.Println("Failed to connect to database with error:")
 		fmt.Println(err)
 		fmt.Println("Continuing without database")
-		_useDb = false
+		db = nil
 		return nil
 	}
 	fmt.Println("Successfully connected to database")
@@ -160,7 +179,7 @@ func connectToDatabase() *DatabaseInterface {
 
 func closeServer() {
 	fmt.Println("Bye!")
-	if _useDb {
+	if db != nil {
 		db.CloseConnection()
 	}
 	os.Exit(0)

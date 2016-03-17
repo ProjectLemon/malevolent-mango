@@ -61,7 +61,7 @@ func (dbi *DatabaseInterface) OpenConnection() error {
 //LookupUser sends a query to the database for the specified
 //username and password hash. Returns error if query failed
 func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = '" + user.Email.String + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = '" + user.Email + "'")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -71,16 +71,17 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 		err := rows.Scan(
 			&user.Email,
 			&user.FullName,
-			&user.PasswordHash,
+			&user.Password,
 			&user.Salt)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
-	if user.Email.Valid && user.FullName.Valid && user.PasswordHash.Valid && user.Salt.Valid {
+	if user.InDatabase() {
 		return user, nil
 	}
+
 	return nil, ErrNoUserFound
 }
 
@@ -89,10 +90,10 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 func (dbi *DatabaseInterface) AddUser(user *User) error {
 	_, err := dbi.DB.Exec(
 		"INSERT INTO Users (EMail, FullName, Password, PasswordSalt) VALUES (?,?,?,?)",
-		user.Email.String,
-		user.FullName.String,
-		user.PasswordHash.String,
-		user.Salt.String)
+		user.Email,
+		user.FullName,
+		user.Password,
+		user.Salt)
 	return err
 }
 

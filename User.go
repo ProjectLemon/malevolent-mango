@@ -1,14 +1,12 @@
 package main
 
-import "database/sql"
-
 //User provides a datatype for gathering the user information
 //for the current user.
 type User struct {
-	Email    sql.NullString
-	FullName sql.NullString
-	Password sql.NullString
-	Salt     sql.NullString
+	Email    string
+	FullName string
+	Password string
+	Salt     string
 }
 
 //NewUser creates a new instance of a user type
@@ -16,9 +14,13 @@ type User struct {
 //and zero value for other fields
 func NewUser(email string) *User {
 	user := new(User)
-	user.Email.String = email
-	user.FullName.String = ""
-	user.PasswordHash.String = ""
-	user.Salt.String = ""
+	user.Email = email
+	user.FullName = ""
+	user.Password = ""
+	user.Salt = ""
 	return user
+}
+
+func (u *User) InDatabase() bool {
+	return (u.FullName != "" && u.Password != "" && u.Salt != "")
 }
