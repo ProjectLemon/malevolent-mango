@@ -4,13 +4,15 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
 	"time"
+
+	"golang.org/x/crypto/scrypt"
+	//"github.com/dgrijalva/jwt-go"
 )
 
 //Global constants
@@ -47,9 +49,6 @@ func main() {
 	fmt.Println("Server is running!")
 	fmt.Println("Listening on PORT: " + port)
 
-	user := NewUser("linussss")
-	db.LookupUser(user)
-
 	//Setup client interface
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
@@ -58,26 +57,14 @@ func main() {
 	http.ListenAndServe(":"+port, nil)
 }
 
+//Checks the provided credentials and authenticates
+//or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
+	var err error
 
-	//Read json from client
-	body, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		http.FileServer(http.Dir("www"))
-		return
-	}
-	user := new(User)
+	user := getClientInfo(w, r)
 
-	//Parse json into User struct
-	err = json.Unmarshal(body, user)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	//See if user is in database
+	//See if user is in database if we're using one
 	if db != nil {
 		user, err = db.LookupUser(user)
 		if err != nil {
@@ -102,28 +89,24 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	//Clear session
 }
 
+//Entrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
-	//Validate input
-	//Add to database
-	//Login
+	user := getClientInfo(w, r)
+	user.Salt = string(generateSalt())
+	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (2 << 16), 8, 1, 32)
+	user.Password = string(passwordHash)
 
-	//This is examplecode and should be rewritten to suit our needs
-	// Create the token
-	token := jwt.New(jwt.SigningMethodHS256)
-	// Set some claims
-	token.Claims["foo"] = "bar"
-	token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	// Sign and get the complete encoded token as a string
-	_, err := token.SignedString(nil)
-	if err != nil {
-		fmt.Println("Log")
+	if db != nil {
+		db.AddUser(user)
 	}
+	login(w, r)
 }
 
 func authenticate(user *User) bool {
 	return true
 }
 
+//Returns a random byte slice of at least 100b in since
 func generateSalt() []byte {
 	salt := make([]byte, 128)
 	n, _ := rand.Read(salt)
@@ -134,6 +117,31 @@ func generateSalt() []byte {
 	return salt
 }
 
+//Takes the request from the client and parses the json
+//inside into a user struct which is being returned
+func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
+	//Read json from client
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.FileServer(http.Dir("www"))
+		return nil
+	}
+	user := new(User)
+
+	//Parse json into User struct
+	err = json.Unmarshal(body, user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return nil
+	}
+	return user
+}
+
+//Tries to open a connection to the database
+//On succes: global value db is asigned a DatabaseInterface-struct
+//On failure: global value db is asigned nil
 func connectToDatabase() *DatabaseInterface {
 	conf, err := os.Open(".db_cnf")
 	if err != nil {
@@ -158,6 +166,7 @@ func connectToDatabase() *DatabaseInterface {
 	return db
 }
 
+//Takes care of closing operations
 func closeServer() {
 	fmt.Println("Bye!")
 	if db != nil {
