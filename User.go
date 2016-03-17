@@ -8,7 +8,3 @@ type User struct {
 	Password string
 	Salt     string
 }
-
-func (u *User) InDatabase() bool {
-	return (u.FullName != "" && u.Password != "" && u.Salt != "")
-}

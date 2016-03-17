@@ -78,7 +78,7 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 		}
 	}
 
-	if user.InDatabase() {
+	if inDatabase(user) {
 		return user, nil
 	}
 
@@ -105,4 +105,9 @@ func (dbi *DatabaseInterface) CloseConnection() {
 //getConnectionString returns the connection details as a formated dataSourceName
 func (dbi *DatabaseInterface) getConnectionString() string {
 	return dbi.User + ":" + dbi.Password + "@" + dbi.DataSourceName
+}
+
+//inDatabase checks is the current user was found in the database
+func inDatabase(u *User) bool {
+	return (u.FullName != "" && u.Password != "" && u.Salt != "")
 }
