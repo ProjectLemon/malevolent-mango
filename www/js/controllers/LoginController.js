@@ -8,7 +8,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
         $scope.user.email != '' && $scope.user.password != '') {
   
       $http
-        .post('/login', $scope.user)
+        .post('/api/login', $scope.user)
         .then(
           /* On success */
           function (response) {
