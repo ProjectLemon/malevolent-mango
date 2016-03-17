@@ -24,3 +24,5 @@ tell from the title.
    ```
    $GOPATH/bin/malicious-mango
    ```
+
+5. Open your browser and navigate to *localhost:8080* to use the server
