@@ -124,6 +124,16 @@ func authenticate(user *User) bool {
 	return true
 }
 
+func generateSalt() []byte {
+	salt := make([]byte, 128)
+	n, _ := rand.Read(salt)
+	for n >= 100 {
+		salt = make([]byte, 128)
+		n, _ = rand.Read(salt)
+	}
+	return salt
+}
+
 func connectToDatabase() *DatabaseInterface {
 	conf, err := os.Open(".db_cnf")
 	if err != nil {
