@@ -1,6 +1,5 @@
 
-app.controller('LoginController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
-  // Declare variables
+app.controller('SignupController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
   $scope.user = {};
   $scope.message = '';
   
@@ -11,7 +10,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
         $scope.user.email != '' && $scope.user.password != '') {
   
       $http
-        .post('/login', $scope.user)
+        .post('/register', $scope.user)
         .then(
           /* On success */
           function (response) {
