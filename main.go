@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,10 +9,26 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
+
+	"golang.org/x/crypto/scrypt"
+	//"github.com/dgrijalva/jwt-go"
 )
 
-var _useDb = true
-var db *DatabaseInterface //in order to close on exit
+//Global constants
+const (
+	_version = 0.1
+)
+
+var (
+	//since opening and closing the database is considered
+	//an expensive operation we keep this global to prevent
+	//unneccesairy calls to the sql api
+	db *DatabaseInterface
+
+	//_useDb     = true       //Flag to see if we are able to use a database
+	_startTime = time.Now() //Last restart
+)
 
 func main() {
 	port := "8080"
@@ -33,44 +50,38 @@ func main() {
 	fmt.Println("Listening on PORT: " + port)
 
 	//Setup client interface
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/logout", logout)
-	http.HandleFunc("/register", register)
+	http.HandleFunc("/api/login", login)
+	http.HandleFunc("/api/logout", logout)
+	http.HandleFunc("/api/register", register)
 	http.Handle("/", http.FileServer(http.Dir("www")))
 	http.ListenAndServe(":"+port, nil)
 }
 
+//Checks the provided credentials and authenticates
+//or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
-	//Get posted info
-	//Lookup in database
-	//Log in or deny
+	var err error
 
-	/* I'm just testing the login on client, remove this
-	   when you actually implement the login /Fredrik */
+	user := getClientInfo(w, r)
 
-	body, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		fmt.Fprintf(w, "%s", err)
-	}
-
-	type User struct {
-		Email    string
-		Password string
-	}
-	var user User
-	err = json.Unmarshal(body, &user)
-
-	//fmt.Println("Header: ", r.Header)
-	//fmt.Println("Body: ", user)
-
-	if user.Email == "testing@example.com" && user.Password == "secret" {
-		w.Write([]byte("{\"token\":\"Token\"}"))
+	//See if user is in database if we're using one
+	if db != nil {
+		user, err = db.LookupUser(user)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(err.Error()))
+			return
+		}
 	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Wrong email or password"))
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("No database present"))
+		return
 	}
-	/* End of testing */
+
+	allowed := authenticate(user)
+	if allowed {
+		w.Write([]byte("{\"token\":\"Token\"}"))
+	}
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
@@ -78,16 +89,63 @@ func logout(w http.ResponseWriter, r *http.Request) {
 	//Clear session
 }
 
+//Entrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
-	//Validate input
-	//Add to database
-	//Login
+	user := getClientInfo(w, r)
+	user.Salt = string(generateSalt())
+	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (2 << 16), 8, 1, 32)
+	user.Password = string(passwordHash)
+
+	if db != nil {
+		db.AddUser(user)
+	}
+	login(w, r)
 }
 
+func authenticate(user *User) bool {
+	return true
+}
+
+//Returns a random byte slice of at least 100b in since
+func generateSalt() []byte {
+	salt := make([]byte, 128)
+	n, _ := rand.Read(salt)
+	for n >= 100 {
+		salt = make([]byte, 128)
+		n, _ = rand.Read(salt)
+	}
+	return salt
+}
+
+//Takes the request from the client and parses the json
+//inside into a user struct which is being returned
+func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
+	//Read json from client
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		http.FileServer(http.Dir("www"))
+		return nil
+	}
+	user := new(User)
+
+	//Parse json into User struct
+	err = json.Unmarshal(body, user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return nil
+	}
+	return user
+}
+
+//Tries to open a connection to the database
+//On succes: global value db is asigned a DatabaseInterface-struct
+//On failure: global value db is asigned nil
 func connectToDatabase() *DatabaseInterface {
 	conf, err := os.Open(".db_cnf")
 	if err != nil {
-		_useDb = false
+		db = nil
 		fmt.Println("No database config file detected")
 		fmt.Println("Continuing without database")
 		return nil
@@ -101,16 +159,17 @@ func connectToDatabase() *DatabaseInterface {
 		fmt.Println("Failed to connect to database with error:")
 		fmt.Println(err)
 		fmt.Println("Continuing without database")
-		_useDb = false
+		db = nil
 		return nil
 	}
 	fmt.Println("Successfully connected to database")
 	return db
 }
 
+//Takes care of closing operations
 func closeServer() {
 	fmt.Println("Bye!")
-	if _useDb {
+	if db != nil {
 		db.CloseConnection()
 	}
 	os.Exit(0)
