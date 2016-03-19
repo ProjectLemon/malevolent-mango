@@ -47,9 +47,8 @@ func main() {
 		c.Run()
 	}
 
-	secretKey = generatePrivateRSAKey()
-
 	//Setup back-end
+	secretKey = generatePrivateRSAKey()
 	db = connectToDatabase()
 	go commandLineInterface()
 	fmt.Println("Server is running!")
@@ -66,34 +65,35 @@ func main() {
 //Checks the provided credentials and authenticates
 //or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
-	//	var err error
+	var err error
 
 	user := getClientInfo(w, r)
 
-	//See if user is in database if we're using one
-	/*if db != nil {
+	//See if user is in database (if we're using one)
+	if db != nil {
 		user, err = db.LookupUser(user)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(err.Error()))
+			w.Write([]byte("User not found"))
 			return
 		}
 	} else {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("No database present"))
 		return
-	}*/
+	}
 
+	//Authenticate user and provide a jwt
 	allowed := authenticate(user)
 	if allowed {
 		token, err := generateToken(user)
 		if err != nil {
-			w.WriteHeader(http.StatusServiceUnavailable)
+			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("Unable to provide web token"))
 			return
 		}
-		response := Response{token}
-		JSON, err := json.Marshal(response)
+
+		JSON, err := json.Marshal(Response{token})
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -103,8 +103,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-	//Validate posted info in database
-	//Clear session
+
 }
 
 //Entrypts the users password and registers it in the database
@@ -117,7 +116,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	if db != nil {
 		db.AddUser(user)
 	}
-	login(w, r)
+	//login(w, r)
 }
 
 func authenticate(user *User) bool {
@@ -190,13 +189,13 @@ func connectToDatabase() *DatabaseInterface {
 		fmt.Println("Failed to connect to database with error:")
 		fmt.Println(err)
 		fmt.Println("Continuing without database")
-		db = nil
 		return nil
 	}
 	fmt.Println("Successfully connected to database")
 	return db
 }
 
+//Generates a RSA key pair (used for signing web tokens)
 func generatePrivateRSAKey() *rsa.PrivateKey {
 	key, err := rsa.GenerateKey(rand.Reader, (2 << 9))
 	if err != nil {
