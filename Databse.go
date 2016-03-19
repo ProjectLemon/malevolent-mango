@@ -8,11 +8,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
 	//ErrNoUserFound if the specified email was not in the database
 	ErrNoUserFound = errors.New("User was not found in database")
+
+	//ErrNoActiveSession if the session was not found in database
+	ErrNoActiveSession = errors.New("Session was not found for the specified user")
 )
 
 //DatabaseInterface represent a configuration object, containing configurations
@@ -78,7 +82,7 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 		}
 	}
 
-	if inDatabase(user) {
+	if userInDatabase(user) {
 		return user, nil
 	}
 
@@ -97,6 +101,33 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 	return err
 }
 
+//GetUserSession reads the user session for the specified user
+//into the user session field of the struct
+func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
+	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE EMail='" + user.Email + "'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(
+			&user.Session.SessionKey,
+			&user.Email,
+			&user.Session.LoginTime,
+			&user.Session.LastSeen)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	if sessionInDatabase(user.Session) {
+		return user, nil
+	}
+
+	return nil, ErrNoActiveSession
+}
+
 //CloseConnection closes any active connection to the current database
 func (dbi *DatabaseInterface) CloseConnection() {
 	dbi.DB.Close()
@@ -107,7 +138,11 @@ func (dbi *DatabaseInterface) getConnectionString() string {
 	return dbi.User + ":" + dbi.Password + "@" + dbi.DataSourceName
 }
 
-//inDatabase checks is the current user was found in the database
-func inDatabase(u *User) bool {
+//inDatabase checks if the current user was found in the database
+func userInDatabase(u *User) bool {
 	return (u.FullName != "" && u.Password != "" && u.Salt != "")
+}
+
+func sessionInDatabase(u *UserSession) bool {
+	return (u.LastSeen != time.Time{} && u.LoginTime != time.Time{} && u.SessionKey != "")
 }
