@@ -2,6 +2,9 @@ package main
 
 import (
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,8 +14,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/scrypt"
-	//"github.com/dgrijalva/jwt-go"
 )
 
 //Global constants
@@ -28,6 +31,7 @@ var (
 
 	//_useDb     = true       //Flag to see if we are able to use a database
 	_startTime = time.Now() //Last restart
+	secretKey  *rsa.PrivateKey
 )
 
 func main() {
@@ -42,6 +46,8 @@ func main() {
 		c.Stdout = os.Stdout
 		c.Run()
 	}
+
+	secretKey = generatePrivateRSAKey()
 
 	//Setup back-end
 	db = connectToDatabase()
@@ -60,12 +66,12 @@ func main() {
 //Checks the provided credentials and authenticates
 //or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
-	var err error
+	//	var err error
 
 	user := getClientInfo(w, r)
 
 	//See if user is in database if we're using one
-	if db != nil {
+	/*if db != nil {
 		user, err = db.LookupUser(user)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -76,11 +82,23 @@ func login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("No database present"))
 		return
-	}
+	}*/
 
 	allowed := authenticate(user)
 	if allowed {
-		w.Write([]byte("{\"token\":\"Token\"}"))
+		token, err := generateToken(user)
+		if err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("Unable to provide web token"))
+			return
+		}
+		response := Response{token}
+		JSON, err := json.Marshal(response)
+		if err != nil {
+			fmt.Println(err)
+		}
+		w.WriteHeader(http.StatusAccepted)
+		w.Write(JSON)
 	}
 }
 
@@ -106,7 +124,20 @@ func authenticate(user *User) bool {
 	return true
 }
 
-//Returns a random byte slice of at least 100b in since
+//Uses the jwt-library and the secretKey to generate a signed jwt
+func generateToken(user *User) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	token.Claims["iss"] = user.Email
+	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
+	key, err := x509.MarshalPKIXPublicKey(secretKey.PublicKey)
+	tokenString, err := token.SignedString(key)
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
+}
+
+//Returns a random byte slice of at least 100b in size
 func generateSalt() []byte {
 	salt := make([]byte, 128)
 	n, _ := rand.Read(salt)
@@ -164,6 +195,15 @@ func connectToDatabase() *DatabaseInterface {
 	}
 	fmt.Println("Successfully connected to database")
 	return db
+}
+
+func generatePrivateRSAKey() *rsa.PrivateKey {
+	key, err := rsa.GenerateKey(rand.Reader, (2 << 9))
+	if err != nil {
+		fmt.Println("Unable to obtain private key")
+		fmt.Println("Continued usage is dicurraged")
+	}
+	return key
 }
 
 //Takes care of closing operations
