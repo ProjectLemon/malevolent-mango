@@ -11,7 +11,11 @@ app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     .when('/login', { 
       controller:'LoginController',
       templateUrl:'/views/login.html'
-    }) 
+    })
+    .when('/signup', { 
+      controller:'SignupController',
+      templateUrl:'/views/signup.html'
+    })
     .otherwise({ 
       redirectTo: '/' 
     }); 
