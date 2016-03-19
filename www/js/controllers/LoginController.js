@@ -21,7 +21,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             • statusText – {string} – HTTP status text of the response.
             */
           
-            $window.sessionStorage.token = response.data.token;
+            $window.sessionStorage.token = response.data.Token;
             $scope.message = 'Logged in';
           },
           /* On error */
