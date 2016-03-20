@@ -61,7 +61,10 @@ func main() {
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
 	http.Handle("/", http.FileServer(http.Dir("www")))
-	http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, nil)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 //Checks the provided credentials and authenticates
@@ -70,6 +73,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	user := getClientInfo(w, r)
+	passString := user.Password
 
 	//See if user is in database (if we're using one)
 	if db != nil {
@@ -86,7 +90,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Authenticate user and provide a jwt
-	allowed := authenticate(user)
+	allowed := authenticate(user, passString)
 	if allowed {
 		token, err := generateToken(user)
 		if err != nil {
@@ -101,6 +105,9 @@ func login(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusAccepted)
 		w.Write(JSON)
+	} else {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("Incorrect email or password"))
 	}
 }
 
@@ -108,7 +115,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//Entrypts the users password and registers it in the database
+//Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
 	user := getClientInfo(w, r)
 	user.Salt = string(generateSalt())
@@ -125,8 +132,13 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authenticate(user *User) bool {
-	return true
+func authenticate(user *User, password string) bool {
+	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 14), 8, 1, 128)
+	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
+	fmt.Println(passwordHash64)
+	fmt.Println(user.Password)
+	return (passwordHash64 == user.Password)
+
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
@@ -173,8 +185,8 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 }
 
 //Tries to open a connection to the database
-//On succes: global value db is asigned a DatabaseInterface-struct
-//On failure: global value db is asigned nil
+//On success: global value db is assigned a DatabaseInterface-struct
+//On failure: global value db is assigned nil
 func connectToDatabase() *DatabaseInterface {
 	conf, err := os.Open(".db_cnf")
 	if err != nil {
