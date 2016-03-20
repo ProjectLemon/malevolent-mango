@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -15,6 +16,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gebi/scryptauth"
 	"golang.org/x/crypto/scrypt"
 )
 
@@ -110,13 +112,17 @@ func logout(w http.ResponseWriter, r *http.Request) {
 func register(w http.ResponseWriter, r *http.Request) {
 	user := getClientInfo(w, r)
 	user.Salt = string(generateSalt())
-	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (2 << 16), 8, 1, 32)
-	user.Password = string(passwordHash)
+	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 14), 8, 1, 128)
+	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
+	user.Password = string(passwordHash64)
 
 	if db != nil {
-		db.AddUser(user)
+		err := db.AddUser(user)
+		if err != nil {
+			w.WriteHeader(http.StatusConflict)
+			w.Write([]byte("User already registered"))
+		}
 	}
-	//login(w, r)
 }
 
 func authenticate(user *User) bool {
@@ -139,12 +145,9 @@ func generateToken(user *User) (string, error) {
 //Returns a random byte slice of at least 100b in size
 func generateSalt() []byte {
 	salt := make([]byte, 128)
-	n, _ := rand.Read(salt)
-	for n >= 100 {
-		salt = make([]byte, 128)
-		n, _ = rand.Read(salt)
-	}
-	return salt
+	rand.Read(salt)
+
+	return []byte(base64.URLEncoding.EncodeToString(salt))
 }
 
 //Takes the request from the client and parses the json
