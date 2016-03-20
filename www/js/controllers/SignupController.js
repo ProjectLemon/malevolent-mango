@@ -10,7 +10,7 @@ app.controller('SignupController', ['$scope', '$http', '$window', function ($sco
         $scope.user.email != '' && $scope.user.password != '') {
   
       $http
-        .post('/register', $scope.user)
+        .post('/api/register', $scope.user)
         .then(
           /* On success */
           function (response) {
@@ -23,7 +23,7 @@ app.controller('SignupController', ['$scope', '$http', '$window', function ($sco
             • statusText – {string} – HTTP status text of the response.
             */
           
-            $window.sessionStorage.token = response.data.token;
+            $window.sessionStorage.Token = response.data.Token;
             $scope.message = 'Logged in';
           },
           /* On error */
