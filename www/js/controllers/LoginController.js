@@ -23,9 +23,13 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             • config – {Object} – The configuration object that was used to generate the request.
             • statusText – {string} – HTTP status text of the response.
             */
-          
-            $window.sessionStorage.token = response.data.Token;
-            $scope.message = 'Logged in';
+            if (response.data.Token !=== undefined) {
+              $window.sessionStorage.token = response.data.Token;
+              $scope.message = 'Logged in';
+              
+            } else {
+              $scope.message = 'Unable to contact server';
+            }
           },
           /* On error */
           function (response) {
