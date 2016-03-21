@@ -89,7 +89,7 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 	return nil, ErrNoUserFound
 }
 
-//AddUser insersts the specified user into the database
+//AddUser inserts the specified user into the database
 //returns error where err == nil if everything went okay
 func (dbi *DatabaseInterface) AddUser(user *User) error {
 	_, err := dbi.DB.Exec(
@@ -133,7 +133,7 @@ func (dbi *DatabaseInterface) CloseConnection() {
 	dbi.DB.Close()
 }
 
-//getConnectionString returns the connection details as a formated dataSourceName
+//getConnectionString returns the connection details as a formatted dataSourceName
 func (dbi *DatabaseInterface) getConnectionString() string {
 	return dbi.User + ":" + dbi.Password + "@" + dbi.DataSourceName
 }
