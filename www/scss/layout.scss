@@ -1,0 +1,129 @@
+/****************************************************
+ *
+ * These are the specific layout styling for 
+ * arranging the layouting the element on the pages
+ * 
+ ****************************************************/
+ 
+ 
+/**
+ * Login
+ */
+.login-form {
+  background-color: $accent-color;
+}
+.signup-form {
+  background-color: #AACFA0;
+}
+ 
+.login-form, .signup-form {
+  width: 100%;
+  max-width: 36rem;
+  margin: auto;
+  color: $text-color-light;
+  border-radius: .7rem;
+  box-shadow: 0 .4rem 3rem rgba(0, 0, 0, .17);
+  
+  position: fixed;
+  top: 50%;
+  right: 0;
+  left: 0;
+  
+  // vertical align
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  
+  label {
+    display: block;
+    padding-bottom: 1rem;
+  }
+  
+  form {
+    margin: 2rem 2.8rem;
+  }
+  
+  .email-form, .password-form {
+    padding: 1em 0;
+  }
+  
+  .input {
+    width: 90%;
+    color: $text-color-dark;
+    background-color: rgba(#EFEFE7, .4);
+
+    -webkit-transition: background-color .2s; /* Safari */
+    transition: background-color .2s;
+    
+    // reset:
+    font-size:100%;
+    border: 0;
+    padding: 0 5%;
+    
+    // placeholder text color
+    &::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+      color:    rgba($text-color-dark, .6);
+    }
+    &:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color:    rgba($text-color-dark, .6);
+    }
+    &::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color:    rgba($text-color-dark, .6);
+    }
+    &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+      color:    rgba($text-color-dark, .6);
+    }
+    &:placeholder-shown { /* Standard */
+      color:    rgba($text-color-dark, .6);;
+    }
+    
+    &:focus {
+      outline: none;
+      background-color: rgba(#EFEFE7, .75);
+    }
+  }
+  
+  .error {
+    float: right;
+    font-size: $font-size-small;
+    padding-top: .5em;
+  }
+  
+  .button-large {
+    display: block;
+    margin: 2em auto;
+  }
+  
+  .tabs {
+    font-size: $font-size-medium;
+    height: 6.4rem;
+    display: table;
+    width: 100%;
+    
+    .tab {
+      width: 50%;
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      color: $text-color-light;
+      
+      &:hover {
+        text-decoration: none;
+      }
+      
+      &.unfocus {
+        background-color: rgba(#EFEFE7, .35);
+        box-shadow: inset .4rem -.3rem 8rem rgba(0, 0, 0, .07);
+        -webkit-transition: background-color .2s; /* Safari */
+        transition: background-color .2s;
+        
+        &:hover {
+          background-color: rgba(239, 239, 231, .45);
+        }
+      }
+    }
+  }
+}

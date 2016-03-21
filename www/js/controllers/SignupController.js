@@ -1,6 +1,5 @@
 
-app.controller('LoginController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
-  // Declare variables
+app.controller('SignupController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
   $scope.user = {};
   $scope.message = '';
   
@@ -11,7 +10,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
         $scope.user.email != '' && $scope.user.password != '') {
   
       $http
-        .post('/api/login', $scope.user)
+        .post('/api/register', $scope.user)
         .then(
           /* On success */
           function (response) {
@@ -24,7 +23,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             • statusText – {string} – HTTP status text of the response.
             */
           
-            $window.sessionStorage.token = response.data.Token;
+            $window.sessionStorage.Token = response.data.Token;
             $scope.message = 'Logged in';
           },
           /* On error */

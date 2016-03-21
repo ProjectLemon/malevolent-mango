@@ -9,10 +9,12 @@
     
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.min.js">
     
-    <!-- if AngularJS fails to load fallback a local version -->
+    <!-- if AngularJS fails to load, fallback on a local version -->
     <script>window.angular || document.write('<script src="js/shared/angular.min.js"><\/script>');</script>
     <script>try {window.angular.module('ngRoute')} catch(e) {document.write('<script src="js/shared/angular-route.min.js"><\/script>')}</script>
+    <script>try {window.angular.module('ngAnimate')} catch(e) {document.write('<script src="js/shared/angular-animate.min.js"><\/script>')}</script>
     
   </head>
   
@@ -27,7 +29,10 @@
 
     <!-- Controllers -->
     <script src="js/controllers/LoginController.js"></script>
-
+    <script src="js/controllers/SignupController.js"></script>
+    
     <!-- Services -->
+    <script src="js/services/authenticationInterceptor.js"></script>
+    
   </body>
 </html>

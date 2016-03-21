@@ -1,3 +1,77 @@
-h1 {
-  font-size: 2em;
+/****************************************************
+ *
+ * Main scss, which doesn't produce any css by itself
+ * 
+ ****************************************************/
+
+@charset "utf-8";
+
+/**
+ * Variables
+ */
+// Width of the content area
+$content-width:   960rem;
+
+$phone:           480rem;
+$desktop:         960rem;
+
+// Fonts settings
+$font-family-header: "Roboto", Helvetica, Arial, sans-serif;
+$font-family-body:   "Roboto", Helvetica, Arial, sans-serif;
+$font-size-base:    1.6rem;
+$font-size-medium:  1.8rem;
+$font-size-large:   2.4rem;
+$font-size-small:   1.2rem;
+$font-weight-base:     400;
+$font-weight-light:    300;
+$font-weight-bold:     700;
+$line-height-base:     1.5;
+
+
+// Colors
+$text-color-dark:        #4A4A4A;
+$text-color-light:       #F5F5F5;
+$background-color:       #F1F0EF;
+$background-color-dark:  #EBEBE8;
+$accent-color:           #85BE7A;
+
+/**
+ * Mixins / Functions
+ */
+@mixin media-query($device) {
+  @media screen and (max-width: $device) {
+    @content;
+  }
 }
+@mixin media-desktop() {
+  @media (min-width: $desktop+1) {
+    @content;
+  }
+}
+@mixin media-tablet() {
+  @media (min-width: $phone+1) and (max-width: $desktop) {
+    @content;
+  }
+}
+@mixin media-phone() {
+  @media (max-width: $phone) {
+    @content;
+  }
+}
+
+
+/**
+ * Super classes
+ */
+ 
+// Clearfix
+%clearfix {
+
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+@import 'base', 'layout';

@@ -31,8 +31,11 @@ Thumbs.db
 
 # Project specific
 .db_cnf
+.db_conf
 .vscode/*
 debug
+.idea/
+malicious-mango.iml
 
 # Sass
 .sass-cache

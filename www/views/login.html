@@ -1,13 +1,33 @@
-<form name="login" class="login-form">
-  <div class="email-form" ng-class="{error: login.name.$invalid && !login.name.$pristine}">
-    <label>E-mail:</label>
-    <input placeholder="E-mail" type="email" name="email" ng-model="string" required>
-    <span class="help-inline">Required</span>
+<div class="login-form">
+
+  <div class="tabs">
+    <a href="#/login" class="tab focus">Log in</a>
+    <a href="#/signup" class="tab unfocus">Sign up</a>
   </div>
+
+  <form name="login" ng-submit="submit()" novalidate>
   
-  <div class="password-form" ng-class="{error: login.name.$invalid && !login.name.$pristine}">
-    <label>Password:</label>
-    <input placeholder="Password" type="password" name="password" ng-model="LoginController.project.name" required>
-    <span class="help-inline">Required</span>
-  </div>
-</form>
+    <div class="email-form">
+      <label>E-mail:</label>
+      <input class="input box" placeholder="E-mail" type="email" name="email" ng-model="user.email" required>
+      <span class="error" ng-show="(login.email.$touched || formNotFilled) && login.email.$error.required">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
+      </span>
+      <span class="error" ng-show="login.email.$error.email">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Not valid email!
+      </span>
+    </div>
+    
+    <div class="password-form">
+      <label>Password:</label>
+      <input class="input box" placeholder="Password" type="password" name="password" ng-model="user.password" required>
+      <span class="error" ng-show="(login.password.$touched || formNotFilled) && login.password.$error.required">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
+      </span>
+    </div>
+    
+    <input class="button-large" type="submit" name="submit" value="Log in →">
+  </form>
+
+  <p>Message: {{ message }}</p> <!-- TODO Remove -->
+</div>
