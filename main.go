@@ -90,7 +90,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Authenticate user and provide a jwt
-	allowed := authenticate(user, passString)
+	allowed := authenticatePassword(user, passString)
 	if allowed {
 		token, err := generateToken(user)
 		if err != nil {
@@ -132,13 +132,10 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authenticate(user *User, password string) bool {
-	return true
-	/*passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 14), 8, 1, 128)
+func authenticatePassword(user *User, password string) bool {
+	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 14), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
-	fmt.Println(passwordHash64)
-	fmt.Println(user.Password)
-	return (string(passwordHash64) == user.Password)*/
+	return (string(passwordHash64) == user.Password)
 
 }
 
