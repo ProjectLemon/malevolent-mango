@@ -137,7 +137,7 @@ func authenticate(user *User, password string) bool {
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
 	fmt.Println(passwordHash64)
 	fmt.Println(user.Password)
-	return (passwordHash64 == user.Password)
+	return (string(passwordHash64) == user.Password)
 
 }
 
