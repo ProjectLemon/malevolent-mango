@@ -140,7 +140,8 @@ func (dbi *DatabaseInterface) getConnectionString() string {
 
 //inDatabase checks if the current user was found in the database
 func userInDatabase(u *User) bool {
-	return (u.FullName != "" && u.Password != "" && u.Salt != "")
+	return (u.Password != "" && u.Salt != "")
+	//return (u.FullName != "" && u.Password != "" && u.Salt != "")
 }
 
 func sessionInDatabase(u *UserSession) bool {
