@@ -34,7 +34,6 @@ var (
 	//unneccesairy calls to the sql api
 	db *DatabaseInterface
 
-	//_useDb     = true       //Flag to see if we are able to use a database
 	_startTime = time.Now() //Last restart
 	secretKey  *rsa.PrivateKey
 )
@@ -63,7 +62,7 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
-	http.HandleFunc("/profile", getProfile)
+	http.HandleFunc("/api/profile", getProfile)
 	http.Handle("/", http.FileServer(http.Dir("www")))
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
@@ -137,22 +136,13 @@ func authenticatePassword(user *User, password string) bool {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	//Check if request contains userid
-	URIsections := strings.Split(r.URL.String(), "/")
-	userId := URIsections[len(URIsections)-1]
-	if userId != "profile" {
 
-	}
-	//if yes, validate token
-	//if token is valid, return inside
-	//else, return public profile
-	//else, return public profile
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
 func generateToken(user *User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["iss"] = user.Email
+	token.Claims["iss"] = user.UserId
 	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	key, err := x509.MarshalPKIXPublicKey(secretKey.PublicKey)
 	tokenString, err := token.SignedString(key)
@@ -170,6 +160,7 @@ func generateSalt() []byte {
 	return []byte(base64.URLEncoding.EncodeToString(salt))
 }
 
+//reads 64 random bytes and returns them as a base64 encoded string
 func generateUserId() string {
 	uid := make([]byte, 64)
 	rand.Read(uid)
@@ -203,11 +194,12 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 	return user
 }
 
+//Validates an email provided by the user
 func validateEmail(user *User) error {
 	_, err := mail.ParseAddress(user.Email)
 	if err != nil {
 		return err
-	} else if user.Email[len(user.Email)-1:] == "'" {
+	} else if strings.Contains(user.Email, "'") {
 		return errors.New("Email cannot end on '")
 	}
 	return nil
