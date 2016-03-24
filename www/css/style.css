@@ -1,1 +1,217 @@
-html,body,div,span,object,ifram,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,img,form,table,time,canvas,header,meny,nav,section,audio,video,dl,dd,ol,ul,figure,blockquote{border:0;font-size:100%;vertical-align:baseline;margin:0;padding:0}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}table{border-collapse:collapse;border-spacing:0}html{font-size:62.5%}body{font-family:"Roboto",Helvetica,Arial,sans-serif;font-size:1.6rem;color:#4a4a4a;background-color:#f1f0ef}.box{border-radius:.6rem;min-height:3em}h1{font-size:2.4rem}a{text-decoration:none}a:hover{text-decoration:underline}.button-large{border-radius:.7rem;border:0;background-color:#f1f0ef;font-family:"Roboto",Helvetica,Arial,sans-serif;font-size:1.8rem;padding:.8em 4em;color:#4a4a4a;box-shadow:0 0.4rem 1.5rem rgba(0,0,0,0.17);-webkit-transition:background-color .1s;transition:background-color .1s}.button-large:hover{background-color:#f8f8f7}.button-large:active{background-color:#fff}.icon{height:1em;width:1em;vertical-align:top}.icon>svg{display:inline-block;height:1em;width:1em;vertical-align:top}.icon>svg path{fill:#4a4a4a}.icon-white>svg path{fill:#f5f5f5}.fade-in.ng-enter{transition:.5s linear all;opacity:0}.fade-in.ng-enter.ng-enter-active{opacity:1}.login-form{background-color:#85be7a}.signup-form{background-color:#AACFA0}.login-form,.signup-form{width:100%;max-width:36rem;margin:auto;color:#f5f5f5;border-radius:.7rem;box-shadow:0 0.4rem 3rem rgba(0,0,0,0.17);position:fixed;top:50%;right:0;left:0;-webkit-transform:translateY(-50%);-ms-transform:translateY(-50%);transform:translateY(-50%);-webkit-transform-style:preserve-3d;-moz-transform-style:preserve-3d;transform-style:preserve-3d}.login-form label,.signup-form label{display:block;padding-bottom:1rem}.login-form form,.signup-form form{margin:2rem 2.8rem}.login-form .email-form,.login-form .password-form,.signup-form .email-form,.signup-form .password-form{padding:1em 0}.login-form .input,.signup-form .input{width:90%;color:#4a4a4a;background-color:rgba(239,239,231,0.4);-webkit-transition:background-color .2s;transition:background-color .2s;font-size:100%;border:0;padding:0 5%}.login-form .input::-webkit-input-placeholder,.signup-form .input::-webkit-input-placeholder{color:rgba(74,74,74,0.6)}.login-form .input:-moz-placeholder,.signup-form .input:-moz-placeholder{color:rgba(74,74,74,0.6)}.login-form .input::-moz-placeholder,.signup-form .input::-moz-placeholder{color:rgba(74,74,74,0.6)}.login-form .input:-ms-input-placeholder,.signup-form .input:-ms-input-placeholder{color:rgba(74,74,74,0.6)}.login-form .input:placeholder-shown,.signup-form .input:placeholder-shown{color:rgba(74,74,74,0.6)}.login-form .input:focus,.signup-form .input:focus{outline:none;background-color:rgba(239,239,231,0.75)}.login-form .error,.signup-form .error{float:right;font-size:1.2rem;padding-top:.5em}.login-form .button-large,.signup-form .button-large{display:block;margin:2em auto}.login-form .tabs,.signup-form .tabs{font-size:1.8rem;height:6.4rem;display:table;width:100%}.login-form .tabs .tab,.signup-form .tabs .tab{width:50%;display:table-cell;vertical-align:middle;text-align:center;color:#f5f5f5}.login-form .tabs .tab:hover,.signup-form .tabs .tab:hover{text-decoration:none}.login-form .tabs .tab.unfocus,.signup-form .tabs .tab.unfocus{background-color:rgba(239,239,231,0.35);box-shadow:inset 0.4rem -0.3rem 8rem rgba(0,0,0,0.07);-webkit-transition:background-color .2s;transition:background-color .2s}.login-form .tabs .tab.unfocus:hover,.signup-form .tabs .tab.unfocus:hover{background-color:rgba(239,239,231,0.45)}
+/****************************************************
+ *
+ * Main scss, which doesn't produce any css by itself
+ * 
+ ****************************************************/
+/**
+ * Variables
+ */
+/**
+ * Mixins / Functions
+ */
+/**
+ * Super classes
+ */
+/****************************************************
+ *
+ * These are the basic styling among common elements
+ * 
+ ****************************************************/
+/**
+ * Reset some basic elements
+ */
+html, body, div, span, object, ifram, h1, h2, h3, h4, h5, h6,
+p, blockquote, pre, a, img, form, table, time, canvas, header,
+meny, nav, section, audio, video, dl, dd, ol, ul, figure, blockquote {
+  border: 0;
+  font-size: 100%;
+  vertical-align: baseline;
+  margin: 0;
+  padding: 0; }
+
+article, aside, details, figcaption, figure, footer, header,
+hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+/**
+ * Basic Styling
+ */
+html {
+  font-size: 62.5%; }
+
+body {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  color: #4A4A4A;
+  background-color: #F1F0EF; }
+
+.box {
+  border-radius: .6rem;
+  min-height: 3em; }
+
+/**
+ * Text
+ */
+h1 {
+  font-size: 2.4rem; }
+
+/**
+ * Links
+ */
+a {
+  text-decoration: none; }
+  a:hover {
+    text-decoration: underline; }
+
+/**
+ * Buttons
+ */
+.button-large {
+  border-radius: .7rem;
+  border: 0;
+  background-color: #F1F0EF;
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  font-size: 1.8rem;
+  padding: .8em 4em;
+  color: #4A4A4A;
+  box-shadow: 0 0.4rem 1.5rem rgba(0, 0, 0, 0.17);
+  -webkit-transition: background-color .1s;
+  /* Safari */
+  transition: background-color .1s; }
+  .button-large:hover {
+    background-color: #f8f8f7; }
+  .button-large:active {
+    background-color: white; }
+
+/**
+ * Icons
+ */
+.icon {
+  height: 1em;
+  width: 1em;
+  vertical-align: top; }
+  .icon > svg {
+    display: inline-block;
+    height: 1em;
+    width: 1em;
+    vertical-align: top; }
+    .icon > svg path {
+      fill: #4A4A4A; }
+
+.icon-white > svg path {
+  fill: #F5F5F5; }
+
+/**
+ * Animations
+ */
+.fade-in.ng-enter {
+  transition: .5s linear all;
+  opacity: 0; }
+
+.fade-in.ng-enter.ng-enter-active {
+  opacity: 1; }
+
+/****************************************************
+ *
+ * These are the specific layout styling for 
+ * arranging the layouting the element on the pages
+ * 
+ ****************************************************/
+/**
+ * Login
+ */
+.login-form {
+  background-color: #85BE7A; }
+
+.signup-form {
+  background-color: #AACFA0; }
+
+.login-form, .signup-form {
+  width: 100%;
+  max-width: 36rem;
+  margin: auto;
+  color: #F5F5F5;
+  border-radius: .7rem;
+  box-shadow: 0 0.4rem 3rem rgba(0, 0, 0, 0.17);
+  position: fixed;
+  top: 50%;
+  right: 0;
+  left: 0;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  -webkit-transform-style: preserve-3d;
+  -moz-transform-style: preserve-3d;
+  transform-style: preserve-3d; }
+  .login-form label, .signup-form label {
+    display: block;
+    padding-bottom: 1rem; }
+  .login-form form, .signup-form form {
+    margin: 2rem 2.8rem; }
+  .login-form .email-form, .login-form .password-form, .signup-form .email-form, .signup-form .password-form {
+    padding: 1em 0; }
+  .login-form .input, .signup-form .input {
+    width: 90%;
+    color: #4A4A4A;
+    background-color: rgba(239, 239, 231, 0.4);
+    -webkit-transition: background-color .2s;
+    /* Safari */
+    transition: background-color .2s;
+    font-size: 100%;
+    border: 0;
+    padding: 0 5%; }
+    .login-form .input::-webkit-input-placeholder, .signup-form .input::-webkit-input-placeholder {
+      /* WebKit, Blink, Edge */
+      color: rgba(74, 74, 74, 0.6); }
+    .login-form .input:-moz-placeholder, .signup-form .input:-moz-placeholder {
+      /* Mozilla Firefox 4 to 18 */
+      color: rgba(74, 74, 74, 0.6); }
+    .login-form .input::-moz-placeholder, .signup-form .input::-moz-placeholder {
+      /* Mozilla Firefox 19+ */
+      color: rgba(74, 74, 74, 0.6); }
+    .login-form .input:-ms-input-placeholder, .signup-form .input:-ms-input-placeholder {
+      /* Internet Explorer 10-11 */
+      color: rgba(74, 74, 74, 0.6); }
+    .login-form .input:placeholder-shown, .signup-form .input:placeholder-shown {
+      /* Standard */
+      color: rgba(74, 74, 74, 0.6); }
+    .login-form .input:focus, .signup-form .input:focus {
+      outline: none;
+      background-color: rgba(239, 239, 231, 0.75); }
+  .login-form .error, .signup-form .error {
+    float: right;
+    font-size: 1.2rem;
+    padding-top: .5em; }
+  .login-form .button-large, .signup-form .button-large {
+    display: block;
+    margin: 2em auto; }
+  .login-form .tabs, .signup-form .tabs {
+    font-size: 1.8rem;
+    height: 6.4rem;
+    display: table;
+    width: 100%; }
+    .login-form .tabs .tab, .signup-form .tabs .tab {
+      width: 50%;
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      color: #F5F5F5; }
+      .login-form .tabs .tab:hover, .signup-form .tabs .tab:hover {
+        text-decoration: none; }
+      .login-form .tabs .tab.unfocus, .signup-form .tabs .tab.unfocus {
+        background-color: rgba(239, 239, 231, 0.35);
+        box-shadow: inset 0.4rem -0.3rem 8rem rgba(0, 0, 0, 0.07);
+        -webkit-transition: background-color .2s;
+        /* Safari */
+        transition: background-color .2s; }
+        .login-form .tabs .tab.unfocus:hover, .signup-form .tabs .tab.unfocus:hover {
+          background-color: rgba(239, 239, 231, 0.45); }
+
+/*# sourceMappingURL=style.css.map */
