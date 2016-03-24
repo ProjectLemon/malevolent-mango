@@ -7,9 +7,11 @@ import (
 
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/mail"
 	"os"
 	"os/exec"
 	"runtime"
@@ -194,7 +196,21 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 		w.Write([]byte(err.Error()))
 		return nil
 	}
+	err = validateEmail(user)
+	if err != nil {
+		user.Email = ""
+	}
 	return user
+}
+
+func validateEmail(user *User) error {
+	_, err := mail.ParseAddress(user.Email)
+	if err != nil {
+		return err
+	} else if user.Email[len(user.Email)-1:] == "'" {
+		return errors.New("Email cannot end on '")
+	}
+	return nil
 }
 
 func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
