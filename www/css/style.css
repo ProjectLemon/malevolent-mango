@@ -214,4 +214,20 @@ a {
         .login-form .tabs .tab.unfocus:hover, .signup-form .tabs .tab.unfocus:hover {
           background-color: rgba(239, 239, 231, 0.45); }
 
+/*Profile page***********************/
+.tabs {
+  font-size: 1.8rem;
+  height: 6.4rem;
+  display: table;
+  width: 100%; }
+  .tabs .tab {
+    width: 50%;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    color: #F5F5F5; }
+  .tabs:focus {
+    outline: none;
+    background-color: red; }
+
 /*# sourceMappingURL=style.css.map */
