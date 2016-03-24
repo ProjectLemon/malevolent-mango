@@ -27,7 +27,7 @@
       
       <input class="input box" placeholder="Verify password" type="password" name="verify" ng-model="user.verify" same-as="user.password" required>
       
-      <span ng-show="signup.verify.$error.verify">Must be equal!</span>
+      <span ng-show="sameAs">Must be equal!</span>
       
       <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.password.$error.required">
         <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
