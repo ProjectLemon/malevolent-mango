@@ -1,0 +1,45 @@
+<div class="signup-form">
+
+  <div class="tabs">
+    <a href="#/login" class="tab unfocus">Log in</a>
+    <a href="#/signup" class="tab focus">Sign up</a>
+  </div>
+
+  <form name="signup" ng-submit="submit()" novalidate>
+  
+    <div class="email-form">
+      <label>E-mail:</label>
+      <input class="input box" placeholder="E-mail" type="email" name="email" ng-model="user.email" required>
+      <span class="error" ng-show="(signup.email.$touched || formNotFilled) && signup.email.$error.required">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
+      </span>
+      <span class="error" ng-show="signup.email.$error.email">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Not valid email!
+      </span>
+    </div>
+    
+    <div class="password-form">
+      <label>Password:</label>
+      <input class="input box" placeholder="Password" type="password" name="password" ng-model="user.password" required>
+      <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.password.$error.required">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
+      </span>
+      
+      <!--<input class="input box" placeholder="Verify password" type="password" name="verifyPassword" ng-model="user.verify" same-as="user.password" required>-->
+      <input class="input box" placeholder="Confirm password" type="password" name="confirmPassword" ng-model="user.confirmPassword" compare-to="user.password" required>
+
+      <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.confirmPassword.$error.compareTo && !signup.password.$error.required">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Password don't match!
+      </span>
+      
+      
+      <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.password.$error.required">
+        <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
+      </span>
+    </div>
+    
+    <input class="button-large" type="submit" name="submit" value="Sign up →">
+  </form>
+
+  <p>Message: {{ message }}</p> <!-- TODO Remove -->
+</div>
