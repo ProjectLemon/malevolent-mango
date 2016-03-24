@@ -61,7 +61,7 @@ app.directive('verifyPassword', function() {
     };
 });
 */
-.directive('sameAs', function() {
+app.directive('sameAs', function() {
   return {
     require: 'ngModel',
     link: function(scope, elm, attrs, ctrl) {

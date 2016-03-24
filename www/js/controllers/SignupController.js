@@ -23,7 +23,7 @@ app.controller('SignupController', ['$scope', '$http', '$window', function ($sco
             • config – {Object} – The configuration object that was used to generate the request.
             • statusText – {string} – HTTP status text of the response.
             */
-            if (response.data.Token !=== undefined) {
+            if (response.data.Token !== undefined) {
               $window.sessionStorage.token = response.data.Token;
               $scope.message = 'Logged in';
               
