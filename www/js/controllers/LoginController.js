@@ -24,10 +24,13 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             • statusText – {string} – HTTP status text of the response.
             */
             if (response.data.Token !== undefined) {
+              /* Complete success */
               $window.sessionStorage.token = response.data.Token;
               $scope.message = 'Logged in';
+              $window.location.href = '/';
               
             } else {
+              /* No server response */
               $scope.message = 'Unable to contact server';
             }
           },
