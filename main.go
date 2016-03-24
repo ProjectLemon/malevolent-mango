@@ -119,9 +119,9 @@ func register(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte("User already registered"))
+		} else {
+			writeToken(w, r, user)
 		}
-	} else {
-		writeToken(w, r, user)
 	}
 }
 
