@@ -26,6 +26,7 @@ app.controller('SignupController', ['$scope', '$http', '$window', function ($sco
             if (response.data.Token !== undefined) {
               $window.sessionStorage.token = response.data.Token;
               $scope.message = 'Logged in';
+              $window.location.href = '#/profile/edit';
               
             } else {
               $scope.message = 'Unable to contact server';
