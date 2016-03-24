@@ -16,6 +16,10 @@ app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
       controller:'SignupController',
       templateUrl:'/views/signup.html'
     })
+    .when('/profile',{
+        controller:'ProfileController',
+        templateUrl:'/views/frontpage.html'
+    })
     .otherwise({ 
       redirectTo: '/' 
     }); 
