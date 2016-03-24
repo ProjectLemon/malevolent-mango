@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -107,6 +108,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 //Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
 	user := getClientInfo(w, r)
+	user.UserId = string(generateUserId())
 	user.Salt = string(generateSalt())
 	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
@@ -123,6 +125,8 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Generates a scrypt key from the provided password and user salt and compares them
+//Returns true/false if hashes match
 func authenticatePassword(user *User, password string) bool {
 	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
@@ -131,7 +135,16 @@ func authenticatePassword(user *User, password string) bool {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
+	//Check if request contains userid
+	URIsections := strings.Split(r.URL.String(), "/")
+	userId := URIsections[len(URIsections)-1]
+	if userId != "profile" {
 
+	}
+	//if yes, validate token
+	//if token is valid, return inside
+	//else, return public profile
+	//else, return public profile
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
@@ -153,6 +166,13 @@ func generateSalt() []byte {
 	rand.Read(salt)
 
 	return []byte(base64.URLEncoding.EncodeToString(salt))
+}
+
+func generateUserId() string {
+	uid := make([]byte, 64)
+	rand.Read(uid)
+
+	return base64.URLEncoding.EncodeToString(uid)
 }
 
 //Takes the request from the client and parses the json

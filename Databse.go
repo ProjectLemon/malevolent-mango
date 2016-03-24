@@ -74,7 +74,7 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 	for rows.Next() {
 		err := rows.Scan(
 			&user.Email,
-			&user.FullName,
+			&user.UserId,
 			&user.Password,
 			&user.Salt)
 		if err != nil {
@@ -93,12 +93,17 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 //returns error where err == nil if everything went okay
 func (dbi *DatabaseInterface) AddUser(user *User) error {
 	_, err := dbi.DB.Exec(
-		"INSERT INTO Users (EMail, FullName, Password, PasswordSalt) VALUES (?,?,?,?)",
+		"INSERT INTO Users (EMail, UserId, Password, PasswordSalt) VALUES (?,?,?,?)",
 		user.Email,
-		user.FullName,
+		user.UserId,
 		user.Password,
 		user.Salt)
 	return err
+}
+
+func (dbi *DatabaseInterface) GetUserContents() error {
+	//rows, err := dbi.DB.Query()
+	return nil
 }
 
 //GetUserSession reads the user session for the specified user
