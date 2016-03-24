@@ -93,7 +93,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	//Authenticate user and provide a jwt
 	allowed := authenticatePassword(user, passString)
 	if allowed {
-		writeToken(r, w, user)
+		writeToken(w, r, user)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Incorrect email or password"))
