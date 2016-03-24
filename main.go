@@ -90,7 +90,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Authenticate user and provide a jwt
-	allowed := authenticate(user, passString)
+	allowed := authenticatePassword(user, passString)
 	if allowed {
 		token, err := generateToken(user)
 		if err != nil {
@@ -119,7 +119,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 func register(w http.ResponseWriter, r *http.Request) {
 	user := getClientInfo(w, r)
 	user.Salt = string(generateSalt())
-	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 14), 8, 1, 128)
+	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
 	user.Password = string(passwordHash64)
 
@@ -132,11 +132,9 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authenticate(user *User, password string) bool {
-	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 14), 8, 1, 128)
+func authenticatePassword(user *User, password string) bool {
+	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
-	fmt.Println(passwordHash64)
-	fmt.Println(user.Password)
 	return (string(passwordHash64) == user.Password)
 
 }
@@ -212,7 +210,7 @@ func connectToDatabase() *DatabaseInterface {
 
 //Generates a RSA key pair (used for signing web tokens)
 func generatePrivateRSAKey() *rsa.PrivateKey {
-	key, err := rsa.GenerateKey(rand.Reader, (2 << 9))
+	key, err := rsa.GenerateKey(rand.Reader, (1 << 11))
 	if err != nil {
 		fmt.Println("Unable to obtain private key")
 		fmt.Println("Continued usage is dicurraged")
