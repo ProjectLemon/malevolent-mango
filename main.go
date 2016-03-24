@@ -60,6 +60,7 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
+	http.HandleFunc("/profile", getProfile)
 	http.Handle("/", http.FileServer(http.Dir("www")))
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
@@ -92,19 +93,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	//Authenticate user and provide a jwt
 	allowed := authenticatePassword(user, passString)
 	if allowed {
-		token, err := generateToken(user)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Unable to provide web token"))
-			return
-		}
-
-		JSON, err := json.Marshal(Response{token})
-		if err != nil {
-			fmt.Println(err)
-		}
-		w.WriteHeader(http.StatusAccepted)
-		w.Write(JSON)
+		writeToken(r, w, user)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Incorrect email or password"))
@@ -129,6 +118,8 @@ func register(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte("User already registered"))
 		}
+	} else {
+		writeToken(w, r, user)
 	}
 }
 
@@ -136,6 +127,10 @@ func authenticatePassword(user *User, password string) bool {
 	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
 	return (string(passwordHash64) == user.Password)
+
+}
+
+func getProfile(w http.ResponseWriter, r *http.Request) {
 
 }
 
@@ -180,6 +175,22 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 		return nil
 	}
 	return user
+}
+
+func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
+	token, err := generateToken(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to provide web token"))
+		return
+	}
+
+	JSON, err := json.Marshal(Response{token})
+	if err != nil {
+		fmt.Println(err)
+	}
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(JSON)
 }
 
 //Tries to open a connection to the database
