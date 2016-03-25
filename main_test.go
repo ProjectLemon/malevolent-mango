@@ -40,6 +40,6 @@ func TestValidateEmailSQLInject(t *testing.T) {
 	user := User{Email: "test@user.com'select * from Users;"}
 	err := validateEmail(&user)
 	if err == nil {
-		t.Fatalf("We really should really not allow sql injections")
+		t.Fatalf("We really should not allow sql injections")
 	}
 }
