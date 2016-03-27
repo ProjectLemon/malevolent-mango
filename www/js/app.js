@@ -16,13 +16,20 @@ app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
       controller:'SignupController',
       templateUrl:'/views/signup.html'
     })
-    .when('/profile',{
-        controller:'ProfileController',
-        templateUrl:'/views/profile.html'
+    .when('/profile', {
+      controller:'ProfileRedirectController',
+      templateUrl:'/views/frontpage.html'
+    })
+    .when('/profile/edit', {
+      controller:'ProfileController',
+      templateUrl:'/views/profile.html'
+    })
+    .when('/profile/:userID', {
+      controller:'ProfileController',
+      templateUrl:'/views/profile.html'
     })
     .otherwise({ 
       redirectTo: '/' 
     }); 
     
-  
 }]);
