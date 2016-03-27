@@ -2,9 +2,6 @@ package main
 
 import (
 	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -35,7 +32,7 @@ var (
 	db *DatabaseInterface
 
 	_startTime = time.Now() //Last restart
-	secretKey  *rsa.PrivateKey
+	secretKey  string
 )
 
 func main() {
@@ -52,7 +49,7 @@ func main() {
 	}
 
 	//Setup back-end
-	secretKey = generatePrivateRSAKey()
+	secretKey = string(generateSalt())
 	db = connectToDatabase()
 	go commandLineInterface()
 	fmt.Println("Server is running!")
@@ -103,7 +100,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
-
+	//TODO: Implement
 }
 
 //Encrypts the users password and registers it in the database
@@ -112,7 +109,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	user.UserId = string(generateUserId())
 	user.Salt = string(generateSalt())
 	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 16), 8, 1, 128)
-	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
+	passwordHash64 := scryptauth.EncodeBase64((1 << 16), []byte(passwordHash), []byte(user.Salt))
 	user.Password = string(passwordHash64)
 
 	if db != nil {
@@ -129,14 +126,17 @@ func register(w http.ResponseWriter, r *http.Request) {
 //Generates a scrypt key from the provided password and user salt and compares them
 //Returns true/false if hashes match
 func authenticatePassword(user *User, password string) bool {
+	//Since the code will be run by a raspberry pi, 65536 is the best
+	//we can do when it comes to cost for our key. Should be increased
+	//to 1048576 (1 << 20) when migrating to a more high end system.
 	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
-	passwordHash64 := scryptauth.EncodeBase64((1 << 14), []byte(passwordHash), []byte(user.Salt))
+	passwordHash64 := scryptauth.EncodeBase64((1 << 16), []byte(passwordHash), []byte(user.Salt))
 	return (string(passwordHash64) == user.Password)
 
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-
+	//validToken := validateToken()
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
@@ -144,9 +144,9 @@ func generateToken(user *User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["iss"] = user.UserId
 	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
-	key, err := x509.MarshalPKIXPublicKey(secretKey.PublicKey)
-	tokenString, err := token.SignedString(key)
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	}
 	return tokenString, nil
@@ -200,11 +200,30 @@ func validateEmail(user *User) error {
 	if err != nil {
 		return err
 	} else if strings.Contains(user.Email, "'") {
-		return errors.New("Email cannot end on '")
+		return errors.New("Email cannot contain '")
 	}
 	return nil
 }
 
+//Validates a token
+func validateToken(rToken string) bool {
+	token, err := jwt.Parse(rToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secretKey), nil
+	})
+	fmt.Println("")
+	if err == nil && token.Valid {
+		fmt.Println(token)
+		return true
+	} else {
+		fmt.Println(err)
+		return false
+	}
+}
+
+//Generates a token and writes it to the client
 func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
 	token, err := generateToken(user)
 	if err != nil {
@@ -245,16 +264,6 @@ func connectToDatabase() *DatabaseInterface {
 	}
 	fmt.Println("Successfully connected to database")
 	return db
-}
-
-//Generates a RSA key pair (used for signing web tokens)
-func generatePrivateRSAKey() *rsa.PrivateKey {
-	key, err := rsa.GenerateKey(rand.Reader, (1 << 11))
-	if err != nil {
-		fmt.Println("Unable to obtain private key")
-		fmt.Println("Continued usage is dicurraged")
-	}
-	return key
 }
 
 //Takes care of closing operations
