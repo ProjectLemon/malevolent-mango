@@ -43,3 +43,10 @@ func TestValidateEmailSQLInject(t *testing.T) {
 		t.Fatalf("We really should not allow sql injections")
 	}
 }
+
+func TestGenerateSalt(t *testing.T) {
+	bytes := generateSalt()
+	if len(bytes) < 100 {
+		t.Fatalf("Should have read 100b, only got: ", len(bytes))
+	}
+}
