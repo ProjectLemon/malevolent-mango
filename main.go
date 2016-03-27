@@ -141,9 +141,9 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
-func generateToken(user *User) (string, error) {
+func generateToken(userId string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["iss"] = user.UserId
+	token.Claims["uid"] = userId
 	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
@@ -180,7 +180,7 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 		w.Write([]byte(err.Error()))
 		return nil
 	}
-	err = validateEmail(user)
+	err = validateEmail(user.Email)
 	if err != nil {
 		user.Email = ""
 	}
@@ -188,37 +188,41 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 }
 
 //Validates an email provided by the user
-func validateEmail(user *User) error {
-	_, err := mail.ParseAddress(user.Email)
+func validateEmail(email string) error {
+	_, err := mail.ParseAddress(email)
 	if err != nil {
 		return err
-	} else if strings.Contains(user.Email, "'") {
+	} else if strings.Contains(email, "'") {
 		return errors.New("Email cannot contain '")
 	}
 	return nil
 }
 
 //Validates a token
-func validateToken(rToken string) bool {
-	token, err := jwt.Parse(rToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+func validateToken(user *User) (bool, *jwt.Token) {
+	token, err := jwt.Parse(user.Session.SessionKey, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(secretKey), nil
 	})
-	fmt.Println("")
+	if token.Claims["uid"] != user.UserId {
+		token.Valid = false
+	} else if token.Claims["exp"].(float64) <= float64(time.Now().Unix()) {
+		token.Valid = false
+	}
+
 	if err == nil && token.Valid {
-		fmt.Println(token)
-		return true
+		return true, token
 	} else {
 		fmt.Println(err)
-		return false
+		return false, token
 	}
 }
 
 //Generates a token and writes it to the client
 func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
-	token, err := generateToken(user)
+	token, err := generateToken(user.UserId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to provide web token"))
