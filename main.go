@@ -49,7 +49,7 @@ func main() {
 	}
 
 	//Setup back-end
-	secretKey = string(generateSalt())
+	secretKey = randBase64String(128)
 	db = connectToDatabase()
 	go commandLineInterface()
 	fmt.Println("Server is running!")
@@ -106,8 +106,12 @@ func logout(w http.ResponseWriter, r *http.Request) {
 //Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
 	user := getClientInfo(w, r)
-	user.UserId = string(generateUserId())
-	user.Salt = string(generateSalt())
+	user.UserId = randBase64String(64)
+	user.Salt = randBase64String(128)
+
+	//Since the code will be run by a raspberry pi, 65536 is the best
+	//we can do when it comes to cost for our key. Should be increased
+	//to 1048576 (1 << 20) when migrating to a more high end system.
 	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 16), []byte(passwordHash), []byte(user.Salt))
 	user.Password = string(passwordHash64)
@@ -126,9 +130,6 @@ func register(w http.ResponseWriter, r *http.Request) {
 //Generates a scrypt key from the provided password and user salt and compares them
 //Returns true/false if hashes match
 func authenticatePassword(user *User, password string) bool {
-	//Since the code will be run by a raspberry pi, 65536 is the best
-	//we can do when it comes to cost for our key. Should be increased
-	//to 1048576 (1 << 20) when migrating to a more high end system.
 	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64((1 << 16), []byte(passwordHash), []byte(user.Salt))
 	return (string(passwordHash64) == user.Password)
@@ -152,20 +153,12 @@ func generateToken(user *User) (string, error) {
 	return tokenString, nil
 }
 
-//Returns a random byte slice of at least 100b in size
-func generateSalt() []byte {
-	salt := make([]byte, 128)
-	rand.Read(salt)
+//Reads n crypto random bytes and return them as a base64 encoded string
+func randBase64String(n int) string {
+	bytes := make([]byte, n)
+	rand.Read(bytes)
 
-	return []byte(base64.URLEncoding.EncodeToString(salt))
-}
-
-//reads 64 random bytes and returns them as a base64 encoded string
-func generateUserId() string {
-	uid := make([]byte, 64)
-	rand.Read(uid)
-
-	return base64.URLEncoding.EncodeToString(uid)
+	return base64.URLEncoding.EncodeToString(bytes)
 }
 
 //Takes the request from the client and parses the json

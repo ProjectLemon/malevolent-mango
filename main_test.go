@@ -45,7 +45,7 @@ func TestValidateEmailSQLInject(t *testing.T) {
 }
 
 func TestGenerateSalt(t *testing.T) {
-	bytes := generateSalt()
+	bytes := randBase64String(128)
 	if len(bytes) < 100 {
 		t.Fatalf("Should have read 100b, only got: ", len(bytes))
 	}
