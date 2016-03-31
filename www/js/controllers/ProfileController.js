@@ -1,6 +1,14 @@
 ﻿app.controller('ProfileController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
   // Declare variables
-  $scope.user = {};
+  $scope.user = {
+      FullName: 'Nathan Drake',
+      Email: 'testing@example.com',
+      Phone: '073-902301',
+      Description: 'Somtha asfkjnsadfjkdfsajkklöjasdf',
+      
+      ProfileIcon: 'images/test.png',
+      ProfileHeader: 'images/testBG.png',
+  };
   $scope.message = ''; 
 
   
