@@ -10,19 +10,26 @@ app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     }) 
     .when('/login', { 
       controller:'LoginController',
-      templateUrl:'/views/login.html'
+      templateUrl:'../views/login.html'
     })
     .when('/signup', { 
       controller:'SignupController',
-      templateUrl:'/views/signup.html'
+      templateUrl:'../views/signup.html'
     })
-    .when('/profile',{
-        controller:'ProfileController',
-        templateUrl:'/views/frontpage.html'
+    .when('/profile', {
+      controller:'ProfileRedirectController',
+      templateUrl:'../views/frontpage.html'
+    })
+    .when('/profile/edit', {
+      controller:'ProfileController',
+      templateUrl:'../views/profile.html'
+    })
+    .when('/profile/:userID', {
+      controller:'ProfileController',
+      templateUrl:'../views/profile.html'
     })
     .otherwise({ 
       redirectTo: '/' 
     }); 
     
-  
 }]);

@@ -214,4 +214,23 @@ a {
         .login-form .tabs .tab.unfocus:hover, .signup-form .tabs .tab.unfocus:hover {
           background-color: rgba(239, 239, 231, 0.45); }
 
+/*Profile page***********************/
+.profileTabs {
+  font-size: 1.8rem;
+  height: 6.4rem;
+  display: table;
+  width: 50%;
+  margin: auto; }
+  .profileTabs .tab {
+    width: 50%;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    color: #F5F5F5;
+    border-radius: 40px 40px 0px 0px; }
+    .profileTabs .tab.focus {
+      background-color: #373839; }
+    .profileTabs .tab.unfocus {
+      background-color: #868686; }
+
 /*# sourceMappingURL=style.css.map */

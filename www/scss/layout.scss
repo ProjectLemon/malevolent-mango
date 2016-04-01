@@ -127,3 +127,28 @@
     }
   }
 }
+/**
+ * Profile page
+ */
+.profileTabs{
+    font-size: $font-size-medium;
+    height: 6.4rem;
+    display: table; 
+    width: 50%;
+    margin:auto; 
+
+    .tab{
+      width: 50%;
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+      color: $text-color-light;
+      border-radius: 40px 40px 0px 0px; 
+      &.focus{
+          background-color: #373839; 
+      }
+      &.unfocus{
+          background-color: #868686; 
+      }
+    }
+}
