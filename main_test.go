@@ -63,6 +63,16 @@ func TestValidateToken(t *testing.T) {
 	}
 }
 
+func TestEmptyToken(t *testing.T) {
+	userId := randBase64String(64)
+	session := UserSession{SessionKey: ""}
+	user := User{UserId: userId, Session: &session}
+	valid, _ := validateToken(&user)
+	if valid {
+		t.Fatalf("Empty Token should not be valid")
+	}
+}
+
 //Benchmark tests
 func BenchmarkGenerateToken(b *testing.B) {
 	userId := randBase64String(64)
