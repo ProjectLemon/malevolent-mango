@@ -127,7 +127,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Generates a scrypt key from the provided password and user salt and compares them
+//Generates a KDF from the provided password and user salt and compares them
 //Returns true/false if hashes match
 func authenticatePassword(user *User, password string) bool {
 	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
@@ -137,7 +137,30 @@ func authenticatePassword(user *User, password string) bool {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	//validToken := validateToken()
+	var err error
+	user := getClientInfo(w, r)
+	valid, _ := validateToken(user)
+	if !valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Invalid web token"))
+		return
+	}
+	userContent := new(UserContents)
+	userContent, err = db.GetUserContents(userContent)
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("No content for the specified user"))
+		return
+	}
+	JSON, err := json.Marshal(userContent)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to send content"))
+	}
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(JSON)
+
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
@@ -206,13 +229,16 @@ func validateToken(user *User) (bool, *jwt.Token) {
 		}
 		return []byte(secretKey), nil
 	})
+	if err != nil {
+		return false, nil
+	}
 	if token.Claims["uid"] != user.UserId {
 		token.Valid = false
 	} else if token.Claims["exp"].(float64) <= float64(time.Now().Unix()) {
 		token.Valid = false
 	}
 
-	if err == nil && token.Valid {
+	if token.Valid {
 		return true, token
 	} else {
 		fmt.Println(err)
