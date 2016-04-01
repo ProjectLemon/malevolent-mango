@@ -72,7 +72,12 @@ func main() {
 func login(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	user := getClientInfo(w, r)
+	user, err := getClientInfo(w, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	passString := user.Password
 
 	//See if user is in database (if we're using one)
@@ -105,7 +110,12 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 //Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
-	user := getClientInfo(w, r)
+	user, err := getClientInfo(w, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	user.UserId = randBase64String(64)
 	user.Salt = randBase64String(128)
 
@@ -138,7 +148,12 @@ func authenticatePassword(user *User, password string) bool {
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
 	var err error
-	user := getClientInfo(w, r)
+	user, err := getClientInfo(w, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	valid, _ := validateToken(user)
 	if !valid {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -186,13 +201,14 @@ func randBase64String(n int) string {
 
 //Takes the request from the client and parses the json
 //inside into a user struct which is being returned
-func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
+func getClientInfo(w http.ResponseWriter, r *http.Request) (*User, error) {
 	//Read json from client
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		http.FileServer(http.Dir("www"))
-		return nil
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return nil, err
 	}
 	user := new(User)
 
@@ -200,14 +216,15 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
 	err = json.Unmarshal(body, user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Println(err)
 		w.Write([]byte(err.Error()))
-		return nil
+		return nil, err
 	}
 	err = validateEmail(user.Email)
 	if err != nil {
 		user.Email = ""
 	}
-	return user
+	return user, nil
 }
 
 //Validates an email provided by the user
