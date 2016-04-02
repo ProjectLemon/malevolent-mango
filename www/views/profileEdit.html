@@ -1,6 +1,14 @@
-﻿<section class="profile-content">
+<section class="profile-content">
 
   <header class="profile-header" background-image="{{ user.ProfileHeader }}">
+    <!--
+    <input id="true-change-background" type="file" name="file"/>
+    <img id="change-background" class="edit-circle" ng-click="changeBackground(); $event.stopPropagation();" src="img/edit-circle.svg" alt="Change background">
+    -->
+    <div class="edit-circle" file-upload-button >
+      <img src="img/edit-circle.svg" alt="Change background">
+    </div>
+  
     <img class="profile-icon" src="{{ user.ProfileIcon }}" alt="Profile picture">
     <h1 class="fullname">{{ user.FullName }}</h1>
 

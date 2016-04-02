@@ -22,7 +22,7 @@ $font-size-base:    1.6rem;
 $font-size-medium:  1.8rem;
 $font-size-large:   2.4rem;
 $font-size-small:   1.2rem;
-$font-weight-base:     400;
+$font-weight-medium:   400;
 $font-weight-light:    300;
 $font-weight-bold:     700;
 $line-height-base:     1.5;
@@ -32,14 +32,14 @@ $line-height-base:     1.5;
 $text-color-dark:        #4A4A4A;
 $text-color-light:       #F5F5F5;
 $background-color:       #F1F0EF;
-$background-color-dark:  #EBEBE8;
+$background-color-dark:  #373839;
 $accent-color:           #85BE7A;
 
 /**
  * Mixins / Functions
  */
-@mixin media-query($device) {
-  @media screen and (max-width: $device) {
+@mixin media-query($width) {
+  @media screen and (max-width: $width) {
     @content;
   }
 }

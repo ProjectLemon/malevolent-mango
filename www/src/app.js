@@ -21,8 +21,8 @@ app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
       templateUrl:'../views/frontpage.html'
     })
     .when('/profile/edit', {
-      controller:'ProfileController',
-      templateUrl:'../views/profile.html'
+      controller:'ProfileEditController',
+      templateUrl:'../views/profileEdit.html'
     })
     .when('/profile/:userID', {
       controller:'ProfileController',

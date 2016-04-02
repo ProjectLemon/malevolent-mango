@@ -1,4 +1,4 @@
-﻿app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams', function ($scope, $http, $window, $routeParams) {
+app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout', function ($scope, $http, $window, $timeout) {
   // Declare variables
   $scope.user = {
       FullName: 'Nathan Drake',
@@ -12,7 +12,7 @@
       Pdfs: [
           {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'}, 
           {title: 'Resumé', path: 'pdfs/resume1.pdf'},
-          {title: $routeParams.userID}
+          {title: '+'}
       ]
   };
   $scope.message = ''; 
@@ -31,4 +31,8 @@
       $scope.message = 'User is not found'; 
     }
   )
+  
+  $scope.changeBackground = function($event) {
+  
+  }
 }]);
