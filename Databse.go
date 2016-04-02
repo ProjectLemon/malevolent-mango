@@ -17,6 +17,9 @@ var (
 
 	//ErrNoActiveSession if the session was not found in database
 	ErrNoActiveSession = errors.New("Session was not found for the specified user")
+
+	//ErrNoContentInDatabase if no content was found for the user
+	ErrNoContentInDatabase = errors.New("No content in database for the specified user")
 )
 
 //DatabaseInterface represent a configuration object, containing configurations
@@ -101,9 +104,36 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 	return err
 }
 
-func (dbi *DatabaseInterface) GetUserContents() error {
-	//rows, err := dbi.DB.Query()
-	return nil
+//GetUserContents looks up, and return, user content in database
+func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserContents, error) {
+	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE UserId='" + userContent.UserId + "'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tmp []uint8
+
+	for rows.Next() {
+		err := rows.Scan(
+			&userContent.UserId,
+			&userContent.FullName,
+			&userContent.Phone,
+			&userContent.EMail,
+			&userContent.ProfileIcon,
+			&userContent.ProfileHeader,
+			&userContent.Description,
+			&tmp)
+		if err != nil {
+			fmt.Println(err)
+		}
+		userContent.PDFs = stringArrayify(tmp)
+	}
+	if contentInDatabase(userContent) {
+		return userContent, nil
+	}
+
+	return nil, ErrNoContentInDatabase
 }
 
 //GetUserSession reads the user session for the specified user
@@ -149,6 +179,18 @@ func userInDatabase(u *User) bool {
 	//return (u.FullName != "" && u.Password != "" && u.Salt != "")
 }
 
+//sessionInDatabase checks if the current UserSession was found in the database
 func sessionInDatabase(u *UserSession) bool {
 	return (u.LastSeen != time.Time{} && u.LoginTime != time.Time{} && u.SessionKey != "")
+}
+
+//contentInDatabase checks if the current UserContents was found in the database
+func contentInDatabase(u *UserContents) bool {
+	return u.EMail != ""
+}
+
+//In order to handle strange behaviour in sql
+func stringArrayify(arr []uint8) []string {
+	str := string(arr)
+	return strings.Split(str, "\n")
 }
