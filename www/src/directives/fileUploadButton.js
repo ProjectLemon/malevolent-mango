@@ -8,8 +8,6 @@ app.directive('fileUploadButton', function() {
       el.css({
         position: 'relative',
         overflow: 'hidden',
-        width: '6rem',
-        height: '6rem'
       })
 
       var fileInput = angular.element('<input type="file" multiple />')

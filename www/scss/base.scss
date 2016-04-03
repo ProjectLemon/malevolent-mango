@@ -90,6 +90,10 @@ a {
     background-color: lighten($background-color, 10%);
   }
 }
+.edit-circle {
+  position: absolute !important;
+  padding: 1rem;
+}
 
 
 /**
@@ -114,18 +118,74 @@ a {
 .icon-white > svg path {
   fill: $text-color-light;
 }
+.editable {
+  position: relative;
+  text-decoration: underline;
+  
+  &:focus {
+    text-decoration: none;
+  }
+}
+.editable:before {
+  content: "\a0\a0\a0\a0\a0"; // \a0 = (a space)
+  background-image: url('../img/edit.svg');
+  background-size: 100% 100%;
+  text-decoration: none;
+  display: inline-block;
+}
+
 
 
 /**
  * Animations
  */
-.fade-in.ng-enter {
-  transition: .5s linear all;
-  opacity: 0;
+
+// Loading spinner 
+$offset: 187;
+$duration: 1.4s;
+
+.loading {
+  animation: rotator $duration linear infinite;
+  
+  &.ng-hide-add {
+    animation: .4s opacity-out ease;
+  }
 }
 
-.fade-in.ng-enter.ng-enter-active {
-  opacity: 1;
+@keyframes opacity-out {
+  0% {opacity: 1}
+  100% {opacity: 0}
+}
+@keyframes opacity-in {
+  0% {opacity: 0}
+  100% {opacity: 1}
+}
+
+@keyframes rotator {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(270deg); }
+}
+
+.loading .path {
+  stroke-dasharray: $offset;
+  stroke-dashoffset: 0;
+  transform-origin: center;
+  stroke: black;
+  animation:
+    dash $duration ease-in-out infinite;
+}
+
+
+@keyframes dash {
+ 0% { stroke-dashoffset: $offset; }
+ 50% {
+   stroke-dashoffset: $offset/4;
+   transform:rotate(135deg);
+ }
+ 100% {
+   stroke-dashoffset: $offset;
+   transform:rotate(450deg);
+ }
 }
 
 

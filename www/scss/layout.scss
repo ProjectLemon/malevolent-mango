@@ -152,9 +152,24 @@
     height: auto;
     display: block;
     margin: 2rem auto;
+    position: relative;
     
     box-shadow: 0 .7rem 1.4rem rgba(0, 0, 0, .29);
     border-radius: 50%;
+  }
+  
+  .profile-icon-container {
+    width: 15rem;
+    height: auto;
+    display: block;
+    margin: 2rem auto;
+    position: relative;
+    border-radius: 50%;
+    
+    .edit-circle {
+      top: 25%;
+      left: 25%;
+    }
   }
   .fullname {
     text-align: center;
@@ -199,6 +214,23 @@
       color: $text-color-light;
     }
   }
+
+  .loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 75%;
+    height: 75%;
+    padding: .62rem .93rem;
+    
+    .path {
+      stroke: rgba(#fff, .8);
+    }
+  }
+  
+  .editable:before {
+    background-image: url('../img/edit-white.svg');
+  }
 }
 .profile-body {
   width: 100%;
@@ -216,6 +248,10 @@
     @media screen and (max-width: 43em) {
       width: 75%;
     }
+  }
+
+  .editable:before {
+    background-image: url('../img/edit-gray.svg');
   }
 }
  
@@ -264,7 +300,4 @@
   height: 80rem; // TODO placeholder
   background: $background-color-dark;
 }
-.edit-circle {
-  position: absolute !important;
-  padding: 1rem;
-}
+

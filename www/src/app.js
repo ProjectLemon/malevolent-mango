@@ -1,4 +1,4 @@
-var app = angular.module('MaliciousMango', ['ngRoute', 'ngAnimate']);
+var app = angular.module('MaliciousMango', ['ngRoute', 'ngAnimate', 'lr.upload']);
 
 app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) { 
   // $locationProvider.html5Mode(true); to be used later to remove # in url

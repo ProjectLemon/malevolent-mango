@@ -1,20 +1,30 @@
 <section class="profile-content">
 
-  <header class="profile-header" background-image="{{ user.ProfileHeader }}">
-    <!--
-    <input id="true-change-background" type="file" name="file"/>
-    <img id="change-background" class="edit-circle" ng-click="changeBackground(); $event.stopPropagation();" src="img/edit-circle.svg" alt="Change background">
-    -->
-    <div class="edit-circle" file-upload-button >
+  <header class="profile-header" background-image="{{ user.ProfileHeader }}" path="user.ProfileHeader">
+
+    <upload-button class="edit-circle" url="/api/upload/profile-header" accept="image/*"
+                   on-success="changeBackground(response)" on-upload="startUploadHeader(files)" on-complete="endUploadHeader(response)">
       <img src="img/edit-circle.svg" alt="Change background">
-    </div>
+      <svg ng-show="loading.header" class="loading" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+        <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+      </svg>
+    </upload-button>
   
-    <img class="profile-icon" src="{{ user.ProfileIcon }}" alt="Profile picture">
-    <h1 class="fullname">{{ user.FullName }}</h1>
+    <div class="profile-icon-container" >
+      <img class="profile-icon" src="{{ user.ProfileIcon }}" alt="Profile picture">
+      <upload-button class="edit-circle" url="/api/upload/profile-icon" accept="image/*"
+                     on-success="changeProfileIcon(response)" on-upload="startUploadIcon(files)" on-complete="endUploadIcon(response)">
+        <img src="img/edit-circle.svg" alt="Change background">
+        <svg ng-show="loading.icon" class="loading" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+          <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+        </svg>
+      </upload-button>
+    </div>
+    <h1 class="fullname editable" contenteditable ng-model="user.FullName"></h1>
 
     <div class="profile-information">
-      <p class="email">{{ user.Email }}</p><!--
-   --><p class="phone">{{ user.Phone }}</p>
+      <p class="email editable" contenteditable ng-model="user.Email"></p><!--
+   --><p class="phone editable" contenteditable ng-model="user.Phone"></p>
     </div>
     
     <p class="served-by">Served by: <a href="/">Malicious Mango</a></p>
@@ -22,7 +32,7 @@
   
   <div class="profile-body">
   
-    <p class="description">{{ user.Description }}</p>
+    <p class="description editable" contenteditable ng-model="user.Description"></p>
   
     <div class="profile-tabs">
       <a href="#" class="tab" ng-class="{unfocus: n!=0}" ng-repeat="(n, pdf) in user.Pdfs">

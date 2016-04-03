@@ -16,6 +16,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
       ]
   };
   $scope.message = ''; 
+  $scope.loading = {header: false, icon: false};
 
   
   //Do a http request to server
@@ -23,7 +24,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     //If success
     // Get user information from server and puts it in the user variable
     function (response) {
-      $scope.user = response.data;
+      //$scope.user = response.data;
     },
     //If Error
     // Display message that the user is not found
@@ -32,7 +33,22 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     }
   )
   
-  $scope.changeBackground = function($event) {
-  
+  $scope.changeBackground = function(response) {
+    $scope.user.ProfileHeader = response.data;
+  }
+  $scope.changeProfileIcon = function(response) {
+    $scope.user.ProfileIcon = response.data;
+  }
+  $scope.startUploadHeader = function(response) {
+    $scope.loading.header = true;
+  }
+  $scope.startUploadIcon = function(response) {
+    $scope.loading.icon = true;
+  }
+  $scope.endUploadHeader = function(response) {
+    $scope.loading.header = false;
+  }
+  $scope.endUploadIcon = function(response) {
+    $scope.loading.icon = false;
   }
 }]);

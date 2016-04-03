@@ -23,7 +23,7 @@
     //If success
     // Get user information from server and puts it in the user variable
     function (response) {
-      $scope.user = response.data;
+      //$scope.user = response.data;
     },
     //If Error
     // Display message that the user is not found
