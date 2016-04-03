@@ -1,11 +1,14 @@
-
+/**
+ * LoginController handles the login form, and send the data to server for confirmation
+ */
 app.controller('LoginController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
   // Declare variables
   $scope.user = {};
   $scope.message = '';
   
-  // Submit function
+  /* Submit function, sends login info (email & password) to server */
   $scope.submit = function () {
+  
     /* If form is filled out, send data to server */
     if ($scope.user.email && $scope.user.password && 
         $scope.user.email != '' && $scope.user.password != '') {

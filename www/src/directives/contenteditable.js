@@ -1,3 +1,7 @@
+/**
+ * contenteditable extends the normal html attribute by also
+ * bind it to a scope variable
+ */
 app.directive("contenteditable", function() {
   return {
     require: "ngModel",

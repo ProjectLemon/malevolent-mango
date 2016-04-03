@@ -1,7 +1,7 @@
 var app = angular.module('MaliciousMango', ['ngRoute', 'ngAnimate', 'lr.upload']);
 
 app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) { 
-  // $locationProvider.html5Mode(true); to be used later to remove # in url
+  // $locationProvider.html5Mode(true); // to be used later to remove # in url
 
   /* This is where all pages is specified */
   $routeProvider 

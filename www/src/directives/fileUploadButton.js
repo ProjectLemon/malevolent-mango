@@ -1,3 +1,7 @@
+/**
+ * fileUploadButton creates a custom file picker button.
+ * Does not handle anything with actual uploading
+ */
 app.directive('fileUploadButton', function() {
   return {
     link: function(scope, element, attributes) {

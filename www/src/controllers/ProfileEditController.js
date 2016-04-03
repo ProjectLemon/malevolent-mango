@@ -1,3 +1,7 @@
+/**
+ * ProfileEditController handles the edit page for the user profile.
+ * Will get info from server, handle edits, and then push changes back to server
+ */
 app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout', function ($scope, $http, $window, $timeout) {
   // Declare variables
   $scope.user = {

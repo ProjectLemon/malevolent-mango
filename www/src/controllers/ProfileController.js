@@ -1,4 +1,8 @@
-﻿app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams', function ($scope, $http, $window, $routeParams) {
+﻿/**
+ * ProfileController handles the public profile page. Gets info from server
+ * to then be shown.
+ */
+app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams', function ($scope, $http, $window, $routeParams) {
   // Declare variables
   $scope.user = {
       FullName: 'Nathan Drake',

@@ -1,3 +1,7 @@
+/**
+ * compareTo compares two variable and gives and error
+ * when those two do not match
+ */
 app.directive('compareTo', function() {
     return {
         require: 'ngModel',
