@@ -40,11 +40,30 @@ body {
   font-size: $font-size-base;
   color: $text-color-dark;
   background-color: $background-color;
+  
+  // Make font weight similar cross browsers
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 .box {
   border-radius: .6rem;
   min-height: 3em;
 }
+.vertical-center {
+
+  &:before {
+    content: '';
+    display: inline-block;
+    height: 100%; 
+    vertical-align: middle;
+  }
+  
+  > * {
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
 
 /**
  * Text
@@ -140,51 +159,50 @@ a {
  * Animations
  */
 
-// Loading spinner 
+// Loading spinner, courtesy of Frank Perez http://codepen.io/mrrocks/pen/EiplA
 $offset: 187;
 $duration: 1.4s;
 
 .loading {
-  animation: rotator $duration linear infinite;
+  @include animation(rotator $duration linear infinite);
   
   &.ng-hide-add {
-    animation: .4s opacity-out ease;
+    @include animation(.4s opacity-out ease);
   }
 }
 
-@keyframes opacity-out {
+@include keyframes(opacity-out) {
   0% {opacity: 1}
   100% {opacity: 0}
 }
-@keyframes opacity-in {
+@include keyframes(opacity-in) {
   0% {opacity: 0}
   100% {opacity: 1}
 }
 
-@keyframes rotator {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(270deg); }
+@include keyframes(rotator) {
+  0% { @include transform(rotate(0deg)); }
+  100% { @include transform(rotate(270deg)); }
 }
 
 .loading .path {
   stroke-dasharray: $offset;
   stroke-dashoffset: 0;
-  transform-origin: center;
   stroke: black;
-  animation:
-    dash $duration ease-in-out infinite;
+  @include transform-origin(center);
+  @include animation(dash $duration ease-in-out infinite);
 }
 
 
-@keyframes dash {
+@include keyframes(dash) {
  0% { stroke-dashoffset: $offset; }
  50% {
    stroke-dashoffset: $offset/4;
-   transform:rotate(135deg);
+   @include transform(rotate(135deg));
  }
  100% {
    stroke-dashoffset: $offset;
-   transform:rotate(450deg);
+   @include transform(rotate(450deg));
  }
 }
 

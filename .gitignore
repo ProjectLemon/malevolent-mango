@@ -40,3 +40,4 @@ keys/*
 
 # Sass
 .sass-cache
+*.css.map
