@@ -1,0 +1,55 @@
+<section class="profile-content">
+
+  <header class="profile-header" background-image="{{ user.ProfileHeader }}" path="user.ProfileHeader">
+
+    <upload-button class="edit-circle" url="/api/upload/profile-header" accept="image/*"
+                   on-success="changeBackground(response)" on-upload="startUploadHeader(files)" on-complete="endUploadHeader(response)">
+      <img src="img/edit-circle.svg" alt="Change background">
+      <svg ng-show="loading.header" class="loading" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+        <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+      </svg>
+    </upload-button>
+  
+    <div class="profile-icon-container" >
+      <img class="profile-icon" src="{{ user.ProfileIcon }}" alt="Profile picture">
+      <upload-button class="edit-circle" url="/api/upload/profile-icon" accept="image/*"
+                     on-success="changeProfileIcon(response)" on-upload="startUploadIcon(files)" on-complete="endUploadIcon(response)">
+        <img src="img/edit-circle.svg" alt="Change background">
+        <svg ng-show="loading.icon" class="loading" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+          <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+        </svg>
+      </upload-button>
+    </div>
+    <h1 class="fullname editable" contenteditable ng-model="user.FullName"></h1>
+
+    <div class="profile-information">
+      <p class="email editable" contenteditable ng-model="user.Email"></p><!--
+   --><p class="phone editable" contenteditable ng-model="user.Phone"></p>
+    </div>
+    
+    <p class="served-by">Served by: <a href="/">Malicious Mango</a></p>
+  </header>
+  
+  <div class="profile-body">
+  
+    <p class="description editable" contenteditable ng-model="user.Description"></p>
+  
+    <div class="profile-tabs">
+      <a href="#" class="tab" ng-class="{unfocus: n!=0}" ng-repeat="(n, pdf) in user.Pdfs">
+        <svg class="tab-left-side" width="50.486px" height="44.204px" viewBox="0 0 50.486 44.204" enable-background="new 0 0 50.486 44.204">
+          <path fill="#373839" d="M50.486-0.001v44.205c-25.206,0-44.307,0-50.486,0c0.233,0,0.484,0,0.757,0 C37.293,44.204,13.329,0.045,50.486-0.001z"/>
+        </svg><!--
+        
+     --><span class="pdf-title">{{ pdf.title }}</span><!--
+  
+     --><svg class="tab-right-side" width="50.486px" height="44.204px" viewBox="0 0 50.486 44.204" enable-background="new 0 0 50.486 44.204">
+          <path fill="#373839" d="M0-0.001v44.205c25.206,0,44.307,0,50.486,0c-0.233,0-0.484,0-0.757,0 C13.193,44.204,37.157,0.045,0-0.001z"/>
+        </svg>
+        
+      </a>
+    </div>
+    
+    <div class="pdf"></div>
+  </div>
+
+</section>

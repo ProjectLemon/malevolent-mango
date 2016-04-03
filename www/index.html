@@ -5,18 +5,23 @@
     <title>Title</title>
     <meta charset="UTF-8">
     
+    <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="css/style.css">
     
     <base href="/">
     
+    <!-- AngularJS CDN -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.min.js"></script>
     
-    <!-- if AngularJS fails to load, fallback on a local version -->
+    <!-- if AngularJS CDN fails to load, fallback on a local version -->
     <script>window.angular || document.write('<script src="src/lib/angular.min.js"><\/script>');</script>
     <script>try {window.angular.module('ngRoute')} catch(e) {document.write('<script src="src/lib/angular-route.min.js"><\/script>')}</script>
     <script>try {window.angular.module('ngAnimate')} catch(e) {document.write('<script src="src/lib/angular-animate.min.js"><\/script>')}</script>
+    
+    <!-- Extra libraries -->
+    <script src="src/lib/angular-upload.min.js"></script>
     
   </head>
   
@@ -24,6 +29,7 @@
     <div ng-view></div>
     
     
+
     
     <!-- Modules -->
     <script src="src/app.js"></script>
@@ -32,10 +38,14 @@
     <script src="src/controllers/LoginController.js"></script>
     <script src="src/controllers/SignupController.js"></script>
     <script src="src/controllers/ProfileController.js"></script>
+    <script src="src/controllers/ProfileEditController.js"></script>
     <script src="src/controllers/ProfileRedirectController.js"></script>
     
     <!-- Directives -->
-    <script src="src/directives/passwordValidation.js"></script>
+    <script src="src/directives/compareTo.js"></script>
+    <script src="src/directives/backgroundImage.js"></script>
+    <script src="src/directives/fileUploadButton.js"></script>
+    <script src="src/directives/contenteditable.js"></script>
     
     <!-- Services -->
     <script src="src/services/authenticationInterceptor.js"></script>

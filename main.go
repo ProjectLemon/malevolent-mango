@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/mail"
@@ -60,12 +61,59 @@ func main() {
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
 	http.HandleFunc("/api/profile", getProfile)
+
+	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
+	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
+
 	http.Handle("/", http.FileServer(http.Dir("www")))
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		fmt.Println(err)
 	}
 }
+
+// ---- Start of temp, for uploading files with profile ----
+// TODO Remove
+func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(3 * time.Second)
+
+	path, err := saveFile("img/profile-headers/", r)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	w.Write([]byte(path))
+	fmt.Println("Upoaded header:", path)
+}
+func receiveUploadIcon(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(1 * time.Second)
+
+	path, err := saveFile("img/profile-icons/", r)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	w.Write([]byte(path))
+	fmt.Println("Uploaded icon:", path)
+}
+func saveFile(folder string, r *http.Request) (string, error) {
+	r.ParseMultipartForm(32 << 20)
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	path := folder + handler.Filename
+	f, err := os.OpenFile("www/"+path, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	io.Copy(f, file)
+
+	return path, nil
+}
+
+// ---- End of temp ----
 
 //Checks the provided credentials and authenticates
 //or denies the user.
@@ -148,7 +196,7 @@ func authenticatePassword(user *User, password string) bool {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	var err error
+	//	var err error
 	user, err := getClientInfo(w, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -177,7 +225,6 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(JSON)
-
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt

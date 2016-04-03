@@ -1,8 +1,8 @@
-﻿/**
- * ProfileController handles the public profile page. Gets info from server
- * to then be shown.
+/**
+ * ProfileEditController handles the edit page for the user profile.
+ * Will get info from server, handle edits, and then push changes back to server
  */
-app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams', function ($scope, $http, $window, $routeParams) {
+app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout', function ($scope, $http, $window, $timeout) {
   // Declare variables
   $scope.user = {
       FullName: 'Nathan Drake',
@@ -16,10 +16,11 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
       Pdfs: [
           {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'}, 
           {title: 'Resumé', path: 'pdfs/resume1.pdf'},
-          {title: $routeParams.userID}
+          {title: '+'}
       ]
   };
   $scope.message = ''; 
+  $scope.loading = {header: false, icon: false};
 
   
   //Do a http request to server
@@ -35,4 +36,23 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
       $scope.message = 'User is not found'; 
     }
   )
+  
+  $scope.changeBackground = function(response) {
+    $scope.user.ProfileHeader = response.data;
+  }
+  $scope.changeProfileIcon = function(response) {
+    $scope.user.ProfileIcon = response.data;
+  }
+  $scope.startUploadHeader = function(response) {
+    $scope.loading.header = true;
+  }
+  $scope.startUploadIcon = function(response) {
+    $scope.loading.icon = true;
+  }
+  $scope.endUploadHeader = function(response) {
+    $scope.loading.header = false;
+  }
+  $scope.endUploadIcon = function(response) {
+    $scope.loading.icon = false;
+  }
 }]);

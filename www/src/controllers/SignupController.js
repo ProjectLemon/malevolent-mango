@@ -1,4 +1,6 @@
-
+/**
+ * SignupController handles the signup form which creates a new user
+ */
 app.controller('SignupController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
   // Declare variables
   $scope.user = {};
