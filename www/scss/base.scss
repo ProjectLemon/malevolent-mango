@@ -52,7 +52,7 @@ body {
 .vertical-center {
 
   &:before {
-    content: '';
+    content: ' ';
     display: inline-block;
     height: 100%; 
     vertical-align: middle;
@@ -60,7 +60,6 @@ body {
   
   > * {
     display: inline-block;
-    vertical-align: middle;
   }
 }
 

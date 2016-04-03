@@ -12,7 +12,7 @@ app.directive('backgroundImage', function() {
         var url = attrs.backgroundImage;
         
         element.css({
-            'background-image': 'url(' + url +')',
+            'background-image': 'url("' + url +'")',
             'background-size' : 'cover'
         });
       });
