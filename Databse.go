@@ -112,7 +112,7 @@ func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserC
 	}
 	defer rows.Close()
 
-	var tmp []uint8
+	var jsonField []uint8
 
 	for rows.Next() {
 		err := rows.Scan(
@@ -123,11 +123,12 @@ func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserC
 			&userContent.ProfileIcon,
 			&userContent.ProfileHeader,
 			&userContent.Description,
-			&tmp)
+			&jsonField)
 		if err != nil {
 			fmt.Println(err)
 		}
-		userContent.PDFs = stringArrayify(tmp)
+		//Because []string is not supported by the database api in go
+		userContent.PDFs = getStringArray(jsonField)
 	}
 	if contentInDatabase(userContent) {
 		return userContent, nil
@@ -190,7 +191,7 @@ func contentInDatabase(u *UserContents) bool {
 }
 
 //In order to handle strange behaviour in sql
-func stringArrayify(arr []uint8) []string {
+func getStringArray(arr []uint8) []string {
 	str := string(arr)
 	return strings.Split(str, "\n")
 }
