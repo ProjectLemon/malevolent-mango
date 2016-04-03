@@ -22,7 +22,7 @@ import (
 
 //Global constants
 const (
-	_version = 0.1
+	_version = 0.2
 )
 
 var (
@@ -131,6 +131,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte("User already registered"))
+			return
 		} else {
 			writeToken(w, r, user)
 		}
@@ -172,6 +173,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to send content"))
+		return
 	}
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(JSON)
@@ -206,8 +208,6 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) (*User, error) {
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
 		return nil, err
 	}
 	user := new(User)
@@ -215,9 +215,6 @@ func getClientInfo(w http.ResponseWriter, r *http.Request) (*User, error) {
 	//Parse json into User struct
 	err = json.Unmarshal(body, user)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Println(err)
-		w.Write([]byte(err.Error()))
 		return nil, err
 	}
 	err = validateEmail(user.Email)
