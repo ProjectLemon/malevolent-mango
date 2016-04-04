@@ -137,19 +137,31 @@ func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserC
 	return nil, ErrNoContentInDatabase
 }
 
+//InsertUserSession creates a new row in the database for a user session
+func (dbi *DatabaseInterface) InsertUserSession(user *User) error {
+	_, err := dbi.DB.Exec(
+		"INSERT INTO UserSession (SessionKey, UserId, LoginTime, LastSeenTime) VALUES (?,?,?,?)",
+		user.Token,
+		user.UserId,
+		time.Now().Format(time.RFC3339),
+		time.Now().Format(time.RFC3339))
+	return err
+}
+
 //GetUserSession reads the user session for the specified user
 //into the user session field of the struct
 func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE EMail='" + user.Email + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE SessionKey='" + user.Token + "'")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	user.Session = new(UserSession)
 	for rows.Next() {
 		err := rows.Scan(
 			&user.Session.SessionKey,
-			&user.Email,
+			&user.UserId,
 			&user.Session.LoginTime,
 			&user.Session.LastSeen)
 		if err != nil {
@@ -157,7 +169,7 @@ func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
 		}
 	}
 
-	if sessionInDatabase(user.Session) {
+	if user.UserId != "" {
 		return user, nil
 	}
 
@@ -178,11 +190,6 @@ func (dbi *DatabaseInterface) getConnectionString() string {
 func userInDatabase(u *User) bool {
 	return (u.Password != "" && u.Salt != "")
 	//return (u.FullName != "" && u.Password != "" && u.Salt != "")
-}
-
-//sessionInDatabase checks if the current UserSession was found in the database
-func sessionInDatabase(u *UserSession) bool {
-	return (u.LastSeen != time.Time{} && u.LoginTime != time.Time{} && u.SessionKey != "")
 }
 
 //contentInDatabase checks if the current UserContents was found in the database
