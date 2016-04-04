@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/mail"
@@ -14,7 +15,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-	"io"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gebi/scryptauth"
@@ -23,7 +23,7 @@ import (
 
 //Global constants
 const (
-	_version = 0.1
+	_version = 0.2
 )
 
 var (
@@ -102,7 +102,7 @@ func saveFile(folder string, r *http.Request) (string, error) {
 		return "", err
 	}
 	defer file.Close()
-	path := folder+handler.Filename
+	path := folder + handler.Filename
 	f, err := os.OpenFile("www/"+path, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return "", err
@@ -112,15 +112,20 @@ func saveFile(folder string, r *http.Request) (string, error) {
 
 	return path, nil
 }
-// ---- End of temp ----
 
+// ---- End of temp ----
 
 //Checks the provided credentials and authenticates
 //or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	user := getClientInfo(w, r)
+	user, err := getClientInfo(w, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	passString := user.Password
 
 	//See if user is in database (if we're using one)
@@ -141,6 +146,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	allowed := authenticatePassword(user, passString)
 	if allowed {
 		writeToken(w, r, user)
+		db.InsertUserSession(user)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Incorrect email or password"))
@@ -153,7 +159,12 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 //Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
-	user := getClientInfo(w, r)
+	user, err := getClientInfo(w, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	user.UserId = randBase64String(64)
 	user.Salt = randBase64String(128)
 
@@ -169,6 +180,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte("User already registered"))
+			return
 		} else {
 			writeToken(w, r, user)
 		}
@@ -185,32 +197,50 @@ func authenticatePassword(user *User, password string) bool {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	/* TODO  Code just kept crashing, needed to remove it to able to test stuff
-		var err error
-		user := getClientInfo(w, r)
-		valid, _ := validateToken(user)
-		if !valid {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Invalid web token"))
-			return
-		}
-		userContent := new(UserContents)
-		userContent, err = db.GetUserContents(userContent)
-		if err != nil {
-			w.WriteHeader(http.StatusNoContent)
-			w.Write([]byte("No content for the specified user"))
-			return
-		}
-		JSON, err := json.Marshal(userContent)
-		if err != nil {
-			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("Unable to send content"))
-		}
-		w.WriteHeader(http.StatusAccepted)
-		w.Write(JSON)
-	*/
+	if db == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("No database associated"))
+		return
+	}
 
+	user, err := getClientInfo(w, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	user, err = db.GetUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	valid, _ := validateToken(user)
+	if !valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Invalid web token"))
+		return
+	}
+
+	userContent := new(UserContents)
+	userContent, err = db.GetUserContents(userContent)
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("No content for the specified user"))
+		return
+	}
+
+	JSON, err := json.Marshal(userContent)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to send content"))
+		return
+	}
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(JSON)
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
@@ -236,28 +266,25 @@ func randBase64String(n int) string {
 
 //Takes the request from the client and parses the json
 //inside into a user struct which is being returned
-func getClientInfo(w http.ResponseWriter, r *http.Request) *User {
+func getClientInfo(w http.ResponseWriter, r *http.Request) (*User, error) {
 	//Read json from client
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
-		http.FileServer(http.Dir("www"))
-		return nil
+		return nil, err
 	}
 	user := new(User)
 
 	//Parse json into User struct
 	err = json.Unmarshal(body, user)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(err.Error()))
-		return nil
+		return nil, err
 	}
 	err = validateEmail(user.Email)
 	if err != nil {
 		user.Email = ""
 	}
-	return user
+	return user, nil
 }
 
 //Validates an email provided by the user
@@ -304,6 +331,7 @@ func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
 		w.Write([]byte("Unable to provide web token"))
 		return
 	}
+	user.Token = token
 
 	JSON, err := json.Marshal(Response{token})
 	if err != nil {

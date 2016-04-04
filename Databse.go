@@ -112,7 +112,7 @@ func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserC
 	}
 	defer rows.Close()
 
-	var tmp []uint8
+	var jsonField []uint8
 
 	for rows.Next() {
 		err := rows.Scan(
@@ -123,11 +123,12 @@ func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserC
 			&userContent.ProfileIcon,
 			&userContent.ProfileHeader,
 			&userContent.Description,
-			&tmp)
+			&jsonField)
 		if err != nil {
 			fmt.Println(err)
 		}
-		userContent.PDFs = stringArrayify(tmp)
+		//Because []string is not supported by the database api in go
+		userContent.PDFs = getStringArray(jsonField)
 	}
 	if contentInDatabase(userContent) {
 		return userContent, nil
@@ -136,19 +137,31 @@ func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserC
 	return nil, ErrNoContentInDatabase
 }
 
+//InsertUserSession creates a new row in the database for a user session
+func (dbi *DatabaseInterface) InsertUserSession(user *User) error {
+	_, err := dbi.DB.Exec(
+		"INSERT INTO UserSession (SessionKey, UserId, LoginTime, LastSeenTime) VALUES (?,?,?,?)",
+		user.Token,
+		user.UserId,
+		time.Now().Format(time.RFC3339),
+		time.Now().Format(time.RFC3339))
+	return err
+}
+
 //GetUserSession reads the user session for the specified user
 //into the user session field of the struct
 func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE EMail='" + user.Email + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE SessionKey='" + user.Token + "'")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
+	user.Session = new(UserSession)
 	for rows.Next() {
 		err := rows.Scan(
 			&user.Session.SessionKey,
-			&user.Email,
+			&user.UserId,
 			&user.Session.LoginTime,
 			&user.Session.LastSeen)
 		if err != nil {
@@ -156,7 +169,7 @@ func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
 		}
 	}
 
-	if sessionInDatabase(user.Session) {
+	if user.UserId != "" {
 		return user, nil
 	}
 
@@ -179,18 +192,13 @@ func userInDatabase(u *User) bool {
 	//return (u.FullName != "" && u.Password != "" && u.Salt != "")
 }
 
-//sessionInDatabase checks if the current UserSession was found in the database
-func sessionInDatabase(u *UserSession) bool {
-	return (u.LastSeen != time.Time{} && u.LoginTime != time.Time{} && u.SessionKey != "")
-}
-
 //contentInDatabase checks if the current UserContents was found in the database
 func contentInDatabase(u *UserContents) bool {
 	return u.EMail != ""
 }
 
 //In order to handle strange behaviour in sql
-func stringArrayify(arr []uint8) []string {
+func getStringArray(arr []uint8) []string {
 	str := string(arr)
 	return strings.Split(str, "\n")
 }
