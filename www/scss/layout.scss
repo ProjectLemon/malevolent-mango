@@ -131,14 +131,12 @@
 /**
  * Profile page
  */
+$profile-page-width: 90rem;
 .profile-content {
-  width: 57em;
+  max-width: $profile-page-width;
   margin: auto;
   box-shadow: 0 .2rem 1rem rgba(0, 0, 0, .21);
-  
-  @media screen and (max-width: 57em) {
-    width: 100%;
-  }
+
 }
 .profile-header {
   width: 100%;
@@ -149,13 +147,13 @@
   
   .profile-icon {
     width: 15rem;
-    height: auto;
+    height: 15rem;
     display: block;
     margin: 2rem auto;
     position: relative;
     
     box-shadow: 0 .7rem 1.4rem rgba(0, 0, 0, .29);
-    border-radius: 50%;
+    border-radius: 100%;
   }
   
   .profile-icon-container {
@@ -164,7 +162,7 @@
     display: block;
     margin: 2rem auto;
     position: relative;
-    border-radius: 50%;
+    border-radius: 100%;
     
     .edit-circle {
       top: 25%;
@@ -173,7 +171,7 @@
   }
   .fullname {
     text-align: center;
-    font-weight: $font-weight-light;
+    font-weight: $font-weight-medium;
     color: $text-color-light;
   }
   
@@ -181,7 +179,6 @@
     width: 100%;
     overflow: hidden;
     margin: 3rem auto;
-    font-weight: $font-weight-light;
     color: $text-color-light;
     
     .email {
@@ -205,7 +202,6 @@
     color: $text-color-light;
     opacity: .74;
     padding: .4rem;
-    font-weight: $font-weight-light;
     position: absolute;
     bottom: 0;
     right: 0;
@@ -260,7 +256,6 @@
   margin: auto;
   text-align: center;
   height: 4.42rem;
-  
 
   .tab { 
     display: inline-table;
@@ -290,12 +285,49 @@
       vertical-align: middle;
       text-align: center;
       color: $text-color-light;
-      font-weight: $font-weight-light;
       background-color: $background-color-dark;
       padding: 0 5rem;
     }
   }
 }
+$profile-confirmation-bg-color: #406A85;
+.profile-confirmation-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  background-color: $profile-confirmation-bg-color;
+  box-shadow: 0 0 .6rem rgba(#000, .35);
+  text-align: right;
+  width: 100%;
+  max-width: $profile-page-width+20rem;
+  
+  &:before {
+    content: ' ';
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    background: $profile-confirmation-bg-color;
+    margin: 0 -9600rem;
+    padding: 0 9600rem;
+  }
+
+    
+  .profile-confirm-remember {
+    height: 100%;
+    color: rgba(#fff, .8);
+  }
+  
+  .profile-confirm-button {
+    background: white;
+    margin: 1rem;
+  }
+}
+
 .pdf {
   height: 80rem; // TODO placeholder
   background: $background-color-dark;
