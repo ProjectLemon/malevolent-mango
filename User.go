@@ -9,6 +9,7 @@ type User struct {
 	UserId   string
 	Password string
 	Salt     string
+	Token    string
 	Session  *UserSession
 }
 
