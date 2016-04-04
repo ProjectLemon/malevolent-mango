@@ -9,19 +9,19 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
       Email: 'testing@example.com',
       Phone: '073-902301',
       Description: 'Some description about something or other. Oh look at me, I\'m just writing enough text to get a new line. Lorem ipsum dolar cofal(?) and all that shit.',
-      
+
       ProfileIcon: 'img/testFace.png',
       ProfileHeader: 'img/testBG.png',
-      
+
       Pdfs: [
-          {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'}, 
+          {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'},
           {title: 'Resumé', path: 'pdfs/resume1.pdf'},
           {title: $routeParams.userID}
       ]
   };
-  $scope.message = ''; 
+  $scope.message = '';
 
-  
+
   //Do a http request to server
   $http.get('/api/profile').then(
     //If success
@@ -32,7 +32,7 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
     //If Error
     // Display message that the user is not found
     function(response) {
-      $scope.message = 'User is not found'; 
+      $scope.message = 'User is not found';
     }
   )
 }]);

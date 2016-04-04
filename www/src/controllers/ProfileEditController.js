@@ -9,22 +9,22 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
       Email: 'testing@example.com',
       Phone: '073-902301',
       Description: 'Some description about something or other. Oh look at me, I\'m just writing enough text to get a new line. Lorem ipsum dolar cofal(?) and all that shit.',
-      
+
       ProfileIcon: 'img/testFace.png',
       ProfileHeader: 'img/testBG.png',
-      
+
       Pdfs: [
-          {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'}, 
+          {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'},
           {title: 'Resumé', path: 'pdfs/resume1.pdf'},
           {title: '+'}
       ]
   };
-  $scope.message = ''; 
+  $scope.message = '';
   $scope.loading = {header: false, icon: false};
 
-  
+
   //Do a http request to server
-  $http.get('/api/profile').then(
+  $http.post('/api/profile', {Token:$window.sessionStorage.token}).then(
     //If success
     // Get user information from server and puts it in the user variable
     function (response) {
@@ -33,10 +33,10 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     //If Error
     // Display message that the user is not found
     function(response) {
-      $scope.message = 'User is not found'; 
+      $scope.message = 'User is not found';
     }
   )
-  
+
   $scope.changeBackground = function(response) {
     $scope.user.ProfileHeader = response.data;
   }
