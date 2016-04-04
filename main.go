@@ -146,6 +146,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	allowed := authenticatePassword(user, passString)
 	if allowed {
 		writeToken(w, r, user)
+		db.InsertUserSession(user)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
 		w.Write([]byte("Incorrect email or password"))
@@ -196,19 +197,33 @@ func authenticatePassword(user *User, password string) bool {
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
-	//	var err error
+	if db == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("No database associated"))
+		return
+	}
+
 	user, err := getClientInfo(w, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	user, err = db.GetUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	valid, _ := validateToken(user)
 	if !valid {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("Invalid web token"))
 		return
 	}
+
 	userContent := new(UserContents)
 	userContent, err = db.GetUserContents(userContent)
 	if err != nil {
@@ -216,6 +231,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("No content for the specified user"))
 		return
 	}
+
 	JSON, err := json.Marshal(userContent)
 	if err != nil {
 		fmt.Println(err)
@@ -315,6 +331,7 @@ func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
 		w.Write([]byte("Unable to provide web token"))
 		return
 	}
+	user.Token = token
 
 	JSON, err := json.Marshal(Response{token})
 	if err != nil {
