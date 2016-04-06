@@ -31,5 +31,10 @@ type UserContents struct {
 	ProfileIcon   string
 	ProfileHeader string
 	Description   string
-	PDFs          string
+	PDFs          []PDF
+}
+
+type PDF struct {
+	Title string
+	Path  string
 }
