@@ -21,7 +21,6 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-//Global constants
 const (
 	_version = 0.2
 )
