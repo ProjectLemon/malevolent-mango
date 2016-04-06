@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -198,7 +199,9 @@ func contentInDatabase(u *UserContents) bool {
 }
 
 //In order to handle strange behaviour in sql
-func getStringArray(arr []uint8) string {
+func getStringArray(arr []uint8) []PDF {
 	str := string(arr)
-	return str
+	pdfs := make([]PDF, 0)
+	json.Unmarshal([]byte(str), &pdfs)
+	return pdfs
 }
