@@ -59,7 +59,8 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
-	http.HandleFunc("/api/profile", getProfile)
+	http.HandleFunc("/api/profile/get", getProfile)
+	http.HandleFunc("/api/profile/save", saveProfile)
 
 	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
 	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
@@ -240,6 +241,10 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(JSON)
+}
+
+func saveProfile(w http.ResponseWriter, r *http.Request) {
+	// TODO implement
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt

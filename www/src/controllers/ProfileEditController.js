@@ -24,11 +24,13 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
 
 
   //Do a http request to server
-  $http.post('/api/profile', {Token:$window.sessionStorage.token}).then(
+  $http.get('/api/profile/get').then(
     //If success
     // Get user information from server and puts it in the user variable
     function (response) {
-      //$scope.user = response.data;
+      if (response.data != '') {
+        $scope.user = response.data;
+      }
     },
     //If Error
     // Display message that the user is not found
@@ -54,5 +56,14 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   }
   $scope.endUploadIcon = function(response) {
     $scope.loading.icon = false;
+  }
+  
+  $scope.publish = function() {
+    $http.post('api/profile/save').then(
+      function success(response) {
+      },
+      function error(response) {
+      }
+    );
   }
 }]);

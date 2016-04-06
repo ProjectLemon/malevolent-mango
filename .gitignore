@@ -32,6 +32,7 @@ Thumbs.db
 # Project specific
 .db_cnf
 .db_conf
+.db_cnf*
 .vscode/*
 debug
 .idea/
