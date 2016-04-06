@@ -120,7 +120,7 @@ func saveFile(folder string, r *http.Request) (string, error) {
 func login(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	user, err := getClientInfo(w, r)
+	user, err := getClientBody(w, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -159,7 +159,7 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 //Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
-	user, err := getClientInfo(w, r)
+	user, err := getClientBody(w, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
@@ -203,14 +203,15 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := getClientInfo(w, r)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+	user := new(User)
+	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1]
+	if user.Token == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("No token provided"))
 		return
 	}
 
-	user, err = db.GetUserSession(user)
+	user, err := db.GetUserSession(user)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(err.Error()))
@@ -225,8 +226,9 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userContent := new(UserContents)
-	userContent, err = db.GetUserContents(userContent)
+	userContent, err = db.GetUserContents(user.UserId, userContent)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusNoContent)
 		w.Write([]byte("No content for the specified user"))
 		return
@@ -234,7 +236,6 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 
 	JSON, err := json.Marshal(userContent)
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to send content"))
 		return
@@ -270,7 +271,7 @@ func randBase64String(n int) string {
 
 //Takes the request from the client and parses the json
 //inside into a user struct which is being returned
-func getClientInfo(w http.ResponseWriter, r *http.Request) (*User, error) {
+func getClientBody(w http.ResponseWriter, r *http.Request) (*User, error) {
 	//Read json from client
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
@@ -311,6 +312,7 @@ func validateToken(user *User) (bool, *jwt.Token) {
 		return []byte(secretKey), nil
 	})
 	if err != nil {
+		fmt.Println(err)
 		return false, nil
 	}
 	if token.Claims["uid"] != user.UserId {

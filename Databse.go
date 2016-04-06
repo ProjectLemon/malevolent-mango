@@ -105,8 +105,8 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 }
 
 //GetUserContents looks up, and return, user content in database
-func (dbi *DatabaseInterface) GetUserContents(userContent *UserContents) (*UserContents, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE UserId='" + userContent.UserId + "'")
+func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserContents) (*UserContents, error) {
+	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE UserId='" + uid + "'")
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +198,7 @@ func contentInDatabase(u *UserContents) bool {
 }
 
 //In order to handle strange behaviour in sql
-func getStringArray(arr []uint8) []string {
+func getStringArray(arr []uint8) string {
 	str := string(arr)
-	return strings.Split(str, "\n")
+	return str
 }

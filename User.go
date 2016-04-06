@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 //User provides a struct for gathering the user information
 //for the current user.
@@ -29,5 +31,5 @@ type UserContents struct {
 	ProfileIcon   string
 	ProfileHeader string
 	Description   string
-	PDFs          []string
+	PDFs          string
 }
