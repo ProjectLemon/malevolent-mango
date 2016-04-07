@@ -8,7 +8,7 @@ import (
 //for the current user.
 type User struct {
 	Email    string
-	UserId   string
+	UserID   string
 	Password string
 	Salt     string
 	Token    string
@@ -24,7 +24,7 @@ type UserSession struct {
 
 //UserContents holds information about users name, phone, email, pdf etc
 type UserContents struct {
-	UserId        string
+	UserID        string
 	FullName      string //Max 70 characters as suggested by: http://webarchive.nationalarchives.gov.uk/20100407120701/http://cabinetoffice.gov.uk/govtalk/schemasstandards/e-gif/datastandards.aspx
 	Phone         string
 	EMail         string
@@ -34,6 +34,7 @@ type UserContents struct {
 	PDFs          []PDF
 }
 
+//PDF represents a pdf file. Containing a Title and a search path
 type PDF struct {
 	Title string
 	Path  string

@@ -48,15 +48,15 @@ func TestValidateEmailSQLInject(t *testing.T) {
 func TestGenerateSalt(t *testing.T) {
 	bytes := randBase64String(128)
 	if len(bytes) < 100 {
-		t.Fatalf("Should have read 100b, only got: ", len(bytes))
+		t.Fatal("Should have read 100b, only got: ", len(bytes))
 	}
 }
 
 func TestValidateToken(t *testing.T) {
-	userId := randBase64String(64)
-	token, _ := generateToken(userId)
+	UserID := randBase64String(64)
+	token, _ := generateToken(UserID)
 	session := UserSession{SessionKey: token}
-	user := User{UserId: userId, Session: &session}
+	user := User{UserID: UserID, Session: &session}
 	valid, _ := validateToken(&user)
 	if !valid {
 		t.Fatalf("Token should be valid")
@@ -64,9 +64,9 @@ func TestValidateToken(t *testing.T) {
 }
 
 func TestEmptyToken(t *testing.T) {
-	userId := randBase64String(64)
+	UserID := randBase64String(64)
 	session := UserSession{SessionKey: ""}
-	user := User{UserId: userId, Session: &session}
+	user := User{UserID: UserID, Session: &session}
 	valid, _ := validateToken(&user)
 	if valid {
 		t.Fatalf("Empty Token should not be valid")
@@ -75,9 +75,9 @@ func TestEmptyToken(t *testing.T) {
 
 //Benchmark tests
 func BenchmarkGenerateToken(b *testing.B) {
-	userId := randBase64String(64)
+	UserID := randBase64String(64)
 	for n := 0; n < b.N; n++ {
-		generateToken(userId)
+		generateToken(UserID)
 	}
 }
 
@@ -94,10 +94,10 @@ func BenchmarkValidateEmail(b *testing.B) {
 }
 
 func BenchmarkValidateToken(b *testing.B) {
-	userId := randBase64String(64)
-	token, _ := generateToken(userId)
+	UserID := randBase64String(64)
+	token, _ := generateToken(UserID)
 	session := UserSession{SessionKey: token}
-	user := User{UserId: userId, Session: &session}
+	user := User{UserID: UserID, Session: &session}
 	for n := 0; n < b.N; n++ {
 		validateToken(&user)
 	}
