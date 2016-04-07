@@ -18,11 +18,13 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gebi/scryptauth"
+	"github.com/nytimes/gziphandler"
 	"golang.org/x/crypto/scrypt"
 )
 
 const (
 	_version = 0.2
+	port     = "8080"
 )
 
 var (
@@ -36,7 +38,6 @@ var (
 )
 
 func main() {
-	port := "8080"
 
 	if runtime.GOOS == "windows" {
 		c := exec.Command("cls")
@@ -65,7 +66,13 @@ func main() {
 	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
 	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
 
-	http.Handle("/", http.FileServer(http.Dir("www")))
+	withoutGz := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.FileServer(http.Dir("www"))
+	})
+
+	withGz := gziphandler.GzipHandler(withoutGz)
+
+	http.Handle("/", withGz)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		fmt.Println(err)
@@ -165,7 +172,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	user.UserId = randBase64String(64)
+	user.UserID = randBase64String(64)
 	user.Salt = randBase64String(128)
 
 	//Since the code will be run by a raspberry pi, 65536 is the best
@@ -181,9 +188,8 @@ func register(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusConflict)
 			w.Write([]byte("User already registered"))
 			return
-		} else {
-			writeToken(w, r, user)
 		}
+		writeToken(w, r, user)
 	}
 }
 
@@ -226,7 +232,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userContent := new(UserContents)
-	userContent, err = db.GetUserContents(user.UserId, userContent)
+	userContent, err = db.GetUserContents(user.UserID, userContent)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusNoContent)
@@ -249,9 +255,9 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
-func generateToken(userId string) (string, error) {
+func generateToken(userID string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
-	token.Claims["uid"] = userId
+	token.Claims["uid"] = userID
 	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
@@ -315,7 +321,7 @@ func validateToken(user *User) (bool, *jwt.Token) {
 		fmt.Println(err)
 		return false, nil
 	}
-	if token.Claims["uid"] != user.UserId {
+	if token.Claims["uid"] != user.UserID {
 		token.Valid = false
 	} else if token.Claims["exp"].(float64) <= float64(time.Now().Unix()) {
 		token.Valid = false
@@ -323,15 +329,14 @@ func validateToken(user *User) (bool, *jwt.Token) {
 
 	if token.Valid {
 		return true, token
-	} else {
-		fmt.Println(err)
-		return false, token
 	}
+	fmt.Println(err)
+	return false, token
 }
 
 //Generates a token and writes it to the client
 func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
-	token, err := generateToken(user.UserId)
+	token, err := generateToken(user.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Unable to provide web token"))
