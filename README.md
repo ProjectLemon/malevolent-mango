@@ -26,3 +26,15 @@ tell from the title.
    ```
 
 5. Open your browser and navigate to *localhost:8080* to use the server
+
+##Database
+This project asumes the usage of a database (although it will build even without one). To set up this simply provide a file named *.db_cnf* in the same folder that this file is in. **Remember to add this file to .gitignore if you're using a different one from this repo.** Inside this file you are to provide, username, password, drivername and datasourcename as in the following example:
+
+```
+username Alice
+password SuperStrongPassword1234
+drivername mysql
+datasourcename tcp(0.0.0.0:3306)/databasename?parseTime=true
+```
+
+The file has to be present when the server is started. 
