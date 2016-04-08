@@ -4,19 +4,16 @@
  */
 app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout', function ($scope, $http, $window, $timeout) {
   // Declare variables
-  $scope.user = {
-      FullName: 'Nathan Drake',
-      EMail: 'testing@example.com',
-      Phone: '073-902301',
-      Description: 'Some description about something or other. Oh look at me, I\'m just writing enough text to get a new line. Lorem ipsum dolar cofal(?) and all that shit.',
+  $scope.user = { // Placeholder
+      FullName: 'Full Name',
+      EMail: 'Your email adress',
+      Phone: 'Your phone number',
+      Description: 'Input your description here',
 
-      ProfileIcon: 'img/testFace.png',
-      ProfileHeader: 'img/testBG.png',
+      ProfileIcon: 'img/profileDefault.png',
+      ProfileHeader: 'img/backgroundDefault.png',
 
-      Pdfs: [
-          {title: 'Portfolio', path: 'pdfs/portfolio1.pdf'},
-          {title: 'Resumé', path: 'pdfs/resume1.pdf'},
-          {title: '+'}
+      PDFs: [
       ]
   };
   $scope.message = '';
@@ -28,14 +25,21 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     //If success
     // Get user information from server and puts it in the user variable
     function (response) {
-      if (response.data != '') {
-        $scope.user = response.data;
+      if (response.status == 204) {
+        
+      } else {
+        if (response.data != '') {
+          $scope.user = response.data;
+        }
       }
     },
     //If Error
-    // Display message that the user is not found
     function(response) {
-      $scope.message = 'User is not found';
+      if (response.status == 401) {
+        $scope.message = 'You don\'t have permission to access this content'; 
+      } else {
+        $scope.message = 'User is not found'; 
+      }
     }
   )
 

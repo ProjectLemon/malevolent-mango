@@ -147,7 +147,8 @@ a {
 .editable:before {
   content: "\a0\a0\a0\a0\a0"; // \a0 = (a space)
   background-image: url('../img/edit.svg');
-  background-size: 100% 100%;
+  background-size: auto 100%;
+  background-repeat: no-repeat;
   text-decoration: none;
   display: inline-block;
 }
