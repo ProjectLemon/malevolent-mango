@@ -6,7 +6,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   // Declare variables
   $scope.user = {
       FullName: 'Nathan Drake',
-      Email: 'testing@example.com',
+      EMail: 'testing@example.com',
       Phone: '073-902301',
       Description: 'Some description about something or other. Oh look at me, I\'m just writing enough text to get a new line. Lorem ipsum dolar cofal(?) and all that shit.',
 
@@ -59,8 +59,9 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   }
   
   $scope.publish = function() {
-    $http.post('api/profile/save').then(
+    $http.post('api/profile/save', $scope.user).then(
       function success(response) {
+        
       },
       function error(response) {
       }
