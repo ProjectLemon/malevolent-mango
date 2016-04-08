@@ -78,7 +78,7 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 	for rows.Next() {
 		err := rows.Scan(
 			&user.Email,
-			&user.UserId,
+			&user.UserID,
 			&user.Password,
 			&user.Salt)
 		if err != nil {
@@ -99,7 +99,7 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 	_, err := dbi.DB.Exec(
 		"INSERT INTO Users (EMail, UserId, Password, PasswordSalt) VALUES (?,?,?,?)",
 		user.Email,
-		user.UserId,
+		user.UserID,
 		user.Password,
 		user.Salt)
 	return err
@@ -117,7 +117,7 @@ func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserConte
 
 	for rows.Next() {
 		err := rows.Scan(
-			&userContent.UserId,
+			&userContent.UserID,
 			&userContent.FullName,
 			&userContent.Phone,
 			&userContent.EMail,
@@ -143,7 +143,7 @@ func (dbi *DatabaseInterface) InsertUserSession(user *User) error {
 	_, err := dbi.DB.Exec(
 		"INSERT INTO UserSession (SessionKey, UserId, LoginTime, LastSeenTime) VALUES (?,?,?,?)",
 		user.Token,
-		user.UserId,
+		user.UserID,
 		time.Now().Format(time.RFC3339),
 		time.Now().Format(time.RFC3339))
 	return err
@@ -162,7 +162,7 @@ func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
 	for rows.Next() {
 		err := rows.Scan(
 			&user.Session.SessionKey,
-			&user.UserId,
+			&user.UserID,
 			&user.Session.LoginTime,
 			&user.Session.LastSeen)
 		if err != nil {
@@ -170,7 +170,7 @@ func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
 		}
 	}
 
-	if user.UserId != "" {
+	if user.UserID != "" {
 		return user, nil
 	}
 
@@ -201,7 +201,7 @@ func contentInDatabase(u *UserContents) bool {
 //In order to handle strange behaviour in sql
 func getStringArray(arr []uint8) []PDF {
 	str := string(arr)
-	pdfs := make([]PDF, 0)
+	var pdfs []PDF
 	json.Unmarshal([]byte(str), &pdfs)
 	return pdfs
 }
