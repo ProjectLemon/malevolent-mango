@@ -18,7 +18,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gebi/scryptauth"
-	"github.com/nytimes/gziphandler"
+	"github.com/nytimes/gziphandler" //We might need some sort of license for this
 	"golang.org/x/crypto/scrypt"
 )
 
@@ -66,12 +66,11 @@ func main() {
 	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
 	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
 
+	//Setup gzip for everything
 	withoutGz := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.FileServer(http.Dir("www"))
 	})
-
 	withGz := gziphandler.GzipHandler(withoutGz)
-
 	http.Handle("/", withGz)
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
@@ -209,25 +208,8 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := new(User)
-	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1]
-	if user.Token == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No token provided"))
-		return
-	}
-
-	user, err := db.GetUserSession(user)
+	user, err := handleToken(w, r) //feedback to client happens inside function
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	valid, _ := validateToken(user)
-	if !valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("Invalid web token"))
 		return
 	}
 
@@ -251,6 +233,33 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func saveProfile(w http.ResponseWriter, r *http.Request) {
+	if db == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("No database associated"))
+		return
+	}
+
+	_, err := handleToken(w, r) //feedback to client happens inside function
+	if err != nil {
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Could not read content"))
+		return
+	}
+	userContent := new(UserContents)
+
+	//Parse json into UserContent struct
+	err = json.Unmarshal(body, userContent)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unexpected end of json-input"))
+		return
+	}
+
 	// TODO implement
 }
 
@@ -307,6 +316,33 @@ func validateEmail(email string) error {
 		return errors.New("Email cannot contain '")
 	}
 	return nil
+}
+
+//handleToken takes care of reading and validating the token provided by the client
+//returns a user containing token and user session
+func handleToken(w http.ResponseWriter, r *http.Request) (*User, error) {
+	user := new(User)
+	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1]
+	if user.Token == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("No token provided"))
+		return nil, errors.New("No token provided")
+	}
+
+	user, err := db.GetUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return nil, err
+	}
+
+	valid, _ := validateToken(user)
+	if !valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Invalid web token"))
+		return nil, errors.New("Invalid web token")
+	}
+	return user, nil
 }
 
 //Validates a token
