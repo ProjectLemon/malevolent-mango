@@ -67,8 +67,9 @@ func main() {
 	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
 
 	//Setup gzip for everything
+	fs := http.FileServer(http.Dir("www"))
 	withoutGz := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.FileServer(http.Dir("www"))
+		fs.ServeHTTP(w, r)
 	})
 	withGz := gziphandler.GzipHandler(withoutGz)
 	http.Handle("/", withGz)
