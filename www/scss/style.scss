@@ -29,11 +29,11 @@ $line-height-base:     1.5;
 
 
 // Colors
-$text-color-dark:        #4A4A4A;
+$text-color-dark:        #1F1F1F;
 $text-color-light:       #F5F5F5;
 $background-color:       #F1F0EF;
 $background-color-dark:  #373839;
-$accent-color:           #85BE7A;
+$accent-color:           #406A85;
 
 /**
  * Mixins / Functions
@@ -84,6 +84,24 @@ $accent-color:           #85BE7A;
 @mixin transition($args...) {
   -webkit-transition: $args;
   transition: $args;
+}
+
+@mixin placeholder() {
+  &::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    @content
+  }
+  &:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    @content
+  }
+  &::-moz-placeholder { /* Mozilla Firefox 19+ */
+    @content
+  }
+  &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    @content
+  }
+  &:placeholder-shown { /* Standard */
+    @content
+  }
 }
 
 

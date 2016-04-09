@@ -65,9 +65,10 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   $scope.publish = function() {
     $http.post('api/profile/save', $scope.user).then(
       function success(response) {
-        
+        $scope.message = 'Saved Success'; 
       },
       function error(response) {
+        $scope.message = 'Saved failed';
       }
     );
   }

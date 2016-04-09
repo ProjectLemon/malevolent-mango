@@ -29,8 +29,7 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             if (response.data.Token !== undefined) {
               /* Complete success */
               $window.sessionStorage.token = response.data.Token;
-              $scope.message = 'Logged in';
-              $window.location.href = '/';
+              $window.location.href = '#/profile/edit';
               
             } else {
               /* No server response */

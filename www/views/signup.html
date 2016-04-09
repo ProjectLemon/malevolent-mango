@@ -24,7 +24,9 @@
       <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.password.$error.required">
         <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
       </span>
-      
+    </div>
+    
+    <div class="password-form">
       <input class="input box" placeholder="Confirm password" type="password" name="confirmPassword" ng-model="user.confirmPassword" compare-to="user.password" required>
 
       <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.confirmPassword.$error.compareTo && !signup.password.$error.required">
@@ -32,13 +34,14 @@
       </span>
       
       
-      <span class="error" ng-show="(signup.password.$touched || formNotFilled) && signup.password.$error.required">
+      <span class="error" ng-show="(signup.confirmPassword.$touched || formNotFilled) && signup.confirmPassword.$error.required 
+                                && (signup.password.$touched || formNotFilled) && signup.password.$error.required">
         <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
       </span>
     </div>
     
+    <span class="medium-error" ng-show="message">{{ message }}</span>
+    
     <input class="button-large" type="submit" name="submit" value="Sign up →">
   </form>
-
-  <p>Message: {{ message }}</p> <!-- TODO Remove -->
 </div>

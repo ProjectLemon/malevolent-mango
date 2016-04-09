@@ -10,10 +10,10 @@
     <div class="email-form">
       <label>E-mail:</label>
       <input class="input box" placeholder="E-mail" type="email" name="email" ng-model="user.email" required>
-      <span class="error" ng-show="(login.email.$touched || formNotFilled) && login.email.$error.required">
+      <span class="error" ng-show="formNotFilled && login.password.$error.required && !login.email.$error.email">
         <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
       </span>
-      <span class="error" ng-show="login.email.$error.email">
+      <span class="error" ng-show="formNotFilled && login.email.$error.email">
         <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Not valid email!
       </span>
     </div>
@@ -21,13 +21,13 @@
     <div class="password-form">
       <label>Password:</label>
       <input class="input box" placeholder="Password" type="password" name="password" ng-model="user.password" required>
-      <span class="error" ng-show="(login.password.$touched || formNotFilled) && login.password.$error.required">
+      <span class="error" ng-show="formNotFilled && login.password.$error.required">
         <img class="icon" src="img/exclamation-triangle.svg" alt="Exclamation"> Required!
       </span>
     </div>
     
+    <span class="medium-error" ng-show="message">{{ message }}</span>
+    
     <input class="button-large" type="submit" name="submit" value="Log in →">
   </form>
-
-  <p>Message: {{ message }}</p> <!-- TODO Remove -->
 </div>

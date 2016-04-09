@@ -7,18 +7,22 @@
  
  
 /**
- * Login
+ * Login/Signup
  */
+ 
+ 
 .login-form {
   background-color: $accent-color;
 }
 .signup-form {
-  background-color: #AACFA0;
+  background-color: $accent-color;
+  
 }
  
 .login-form, .signup-form {
   width: 100%;
   max-width: 36rem;
+  overflow-y: scroll;
   margin: auto;
   color: $text-color-light;
   border-radius: .7rem;
@@ -53,7 +57,7 @@
   .input {
     width: 90%;
     color: $text-color-dark;
-    background-color: rgba(#EFEFE7, .4);
+    background-color: rgba(#EFEFE7, .6);
 
     -webkit-transition: background-color .2s; /* Safari */
     transition: background-color .2s;
@@ -62,27 +66,14 @@
     font-size:100%;
     border: 0;
     padding: 0 5%;
-    
-    // placeholder text color
-    &::-webkit-input-placeholder { /* WebKit, Blink, Edge */
-      color:    rgba($text-color-dark, .6);
-    }
-    &:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-      color:    rgba($text-color-dark, .6);
-    }
-    &::-moz-placeholder { /* Mozilla Firefox 19+ */
-      color:    rgba($text-color-dark, .6);
-    }
-    &:-ms-input-placeholder { /* Internet Explorer 10-11 */
-      color:    rgba($text-color-dark, .6);
-    }
-    &:placeholder-shown { /* Standard */
-      color:    rgba($text-color-dark, .6);;
+
+    @include placeholder {
+      color: rgba($text-color-dark, .6);
     }
     
     &:focus {
       outline: none;
-      background-color: rgba(#EFEFE7, .75);
+      background-color: rgba(#EFEFE7, .85);
     }
   }
   
@@ -90,6 +81,14 @@
     float: right;
     font-size: $font-size-small;
     padding-top: .5em;
+  }
+  
+  .medium-error {
+    position: absolute;
+    left: 0;
+    right: 0;
+    padding-top: .7rem;
+    text-align: center;
   }
   
   .button-large {
@@ -297,7 +296,7 @@ $profile-confirmation-bg-color: #406A85;
   left: 0;
   right: 0;
   margin: 0 auto;
-  background-color: $profile-confirmation-bg-color;
+  background-color: $accent-color;
   box-shadow: 0 0 .6rem rgba(#000, .35);
   text-align: right;
   width: 100%;
@@ -311,7 +310,7 @@ $profile-confirmation-bg-color: #406A85;
     z-index: -1;
     width: 100%;
     height: 100%;
-    background: $profile-confirmation-bg-color;
+    background: $accent-color;
     margin: 0 -9600rem;
     padding: 0 9600rem;
   }

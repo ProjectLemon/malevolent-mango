@@ -54,7 +54,8 @@
   
   
   <div class="profile-confirmation-container">
-    <span class="profile-confirm-remember">Remember, this information is going to be public</span>
+    <span class="profile-confirm-remember" ng-show="!message">Remember, this information is going to be public</span>
+    <span class="profile-confirm-remember" ng-show="message">{{ message }}</span>
     <button class="profile-confirm-button button-large" ng-click="publish()">Publish</button>
   </div>
 
