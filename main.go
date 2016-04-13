@@ -260,6 +260,15 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Unexpected end of json-input"))
 		return
 	}
+	user := new(User)
+	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1]
+	_, err = db.GetUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("No active session"))
+		return
+	}
+	db.UpdateUserContent(user.UserID, userContent)
 
 	// TODO implement
 }
