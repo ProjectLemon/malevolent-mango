@@ -60,8 +60,9 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
-	http.HandleFunc("/api/profile/get", getProfile)
 	http.HandleFunc("/api/profile/save", saveProfile)
+	http.HandleFunc("/api/profile/get-edit", getProfileEdit)
+	http.HandleFunc("/api/profile/get-view", getProfileView)
 
 	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
 	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
@@ -202,18 +203,9 @@ func authenticatePassword(user *User, password string) bool {
 
 }
 
-func getProfile(w http.ResponseWriter, r *http.Request) {
-	if db == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("No database associated"))
-		return
-	}
-
-	user, err := handleToken(w, r) //feedback to client happens inside function
-	if err != nil {
-		return
-	}
-
+//Returns a profile to the client
+func getProfileView(w http.ResponseWriter, r *http.Request) {
+	user, err := getClientBody(w, r)
 	userContent := new(UserContents)
 	userContent, err = db.GetUserContents(user.UserID, userContent)
 	if err != nil {
@@ -233,6 +225,22 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	w.Write(JSON)
 }
 
+//Validates token and returns a profile to client for edit
+func getProfileEdit(w http.ResponseWriter, r *http.Request) {
+	if db == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("No database associated"))
+		return
+	}
+
+	_, err := handleToken(w, r) //feedback to client happens inside function
+	if err != nil {
+		return
+	}
+
+}
+
+//Serves the profile into database
 func saveProfile(w http.ResponseWriter, r *http.Request) {
 	if db == nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -268,9 +276,8 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("No active session"))
 		return
 	}
+	// TODO implement validation before UpdateUserContent call
 	db.UpdateUserContent(user.UserID, userContent)
-
-	// TODO implement
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
@@ -332,7 +339,7 @@ func validateEmail(email string) error {
 //returns a user containing token and user session
 func handleToken(w http.ResponseWriter, r *http.Request) (*User, error) {
 	user := new(User)
-	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1]
+	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1] //FIXME: Bug occurs here
 	if user.Token == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("No token provided"))
