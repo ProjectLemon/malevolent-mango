@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -38,4 +39,9 @@ type UserContents struct {
 type PDF struct {
 	Title string
 	Path  string
+}
+
+func (pdf *PDF) String() string {
+	str, _ := json.Marshal(pdf)
+	return string(str)
 }

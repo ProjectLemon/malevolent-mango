@@ -2,14 +2,16 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"os"
 	"strings"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var (
@@ -102,6 +104,17 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 		user.UserID,
 		user.Password,
 		user.Salt)
+
+	_, err = dbi.DB.Exec(
+		"INSERT INTO `UserContent` (`UserId`, `FullName`, `Phone`, `EMail`, `ProfileIcon`, `ProfileHeader`, `Description`, `PDFs`) VALUES (?, ?, ?, ?, ?, ?,? ,?)",
+		user.UserID,
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"")
 	return err
 }
 
@@ -136,6 +149,20 @@ func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserConte
 	}
 
 	return nil, ErrNoContentInDatabase
+}
+
+//UpdateUserContents inserts the specified UserContent
+//for the specified UserId into the database
+func (dbi *DatabaseInterface) UpdateUserContent(uid string, uc *UserContents) error {
+	var buffer bytes.Buffer
+
+	for i := 0; i < len(uc.PDFs); i++ {
+		buffer.WriteString(uc.PDFs[i].String())
+	}
+
+	_, err := dbi.DB.Exec("UPDATE UserContent set UserId='" + uid + "', FullName='" + uc.FullName + "', Phone='" + uc.Phone + "', EMail='" + uc.EMail + "', ProfileIcon='" + uc.ProfileIcon + "', ProfileHeader='" + uc.ProfileHeader + "', Description='" + uc.Description + "', PDFs='" + buffer.String() + "' WHERE UserId='" + uid + "';")
+	fmt.Println(err)
+	return err
 }
 
 //InsertUserSession creates a new row in the database for a user session
