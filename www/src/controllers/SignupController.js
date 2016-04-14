@@ -1,7 +1,7 @@
 /**
  * SignupController handles the signup form which creates a new user
  */
-app.controller('SignupController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
+app.controller('SignupController', ['$scope', '$http', '$window', 'tokenRefresher', function ($scope, $http, $window, tokenRefresher) {
   // Declare variables
   $scope.user = {};
   $scope.message = '';
@@ -28,6 +28,8 @@ app.controller('SignupController', ['$scope', '$http', '$window', function ($sco
             if (response.data.Token !== undefined) {
               $window.sessionStorage.token = response.data.Token;
               $scope.message = 'Logged in';
+              tokenRefresher.start();
+              
               $window.location.href = '#/profile/edit';
               
             } else {

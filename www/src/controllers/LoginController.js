@@ -1,7 +1,7 @@
 /**
  * LoginController handles the login form, and send the data to server for confirmation
  */
-app.controller('LoginController', ['$scope', '$http', '$window', function ($scope, $http, $window) {
+app.controller('LoginController', ['$scope', '$http', '$window', 'tokenRefresher', function ($scope, $http, $window, tokenRefresher) {
   // Declare variables
   $scope.user = {};
   $scope.message = '';
@@ -29,6 +29,8 @@ app.controller('LoginController', ['$scope', '$http', '$window', function ($scop
             if (response.data.Token !== undefined) {
               /* Complete success */
               $window.sessionStorage.token = response.data.Token;
+              tokenRefresher.start();
+              
               $window.location.href = '#/profile/edit';
               
             } else {
