@@ -151,6 +151,8 @@ func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserConte
 	return nil, ErrNoContentInDatabase
 }
 
+//UpdateUserContents inserts the specified UserContent
+//for the specified UserId into the database
 func (dbi *DatabaseInterface) UpdateUserContent(uid string, uc *UserContents) error {
 	var buffer bytes.Buffer
 
