@@ -21,7 +21,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
 
 
   //Do a http request to server
-  $http.get('/api/profile/get').then(
+  $http.get('/api/profile/get-edit').then(
     //If success
     // Get user information from server and puts it in the user variable
     function (response) {

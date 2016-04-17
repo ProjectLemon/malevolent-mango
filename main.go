@@ -191,6 +191,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		writeToken(w, r, user)
+		db.InsertUserSession(user)
 	}
 }
 
@@ -206,6 +207,12 @@ func authenticatePassword(user *User, password string) bool {
 //Returns a profile to the client
 func getProfileView(w http.ResponseWriter, r *http.Request) {
 	user, err := getClientBody(w, r)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
 	userContent := new(UserContents)
 	userContent, err = db.GetUserContents(user.UserID, userContent)
 	if err != nil {

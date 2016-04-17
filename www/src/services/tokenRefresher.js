@@ -19,10 +19,11 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', function($interv
   
     /**
      * stop stops the refreshing of the token. Returns true is sucessful,
-     * else false.
+     * otherwise false.
      */  
     stop: function() {
       if (running) {
+        running = false;
         return $interval.cancel(refresher);
       } else {
         return true;
@@ -52,9 +53,16 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', function($interv
           }
         },
         function error(response) {
-          
+          console.log('Error: could not refresh token ('+response.status+')');
         }
       )
+    },
+    
+    /**
+     * isRunning returns true is tokenRefresher, false, otherwise
+     */
+    isRunning: function() {
+      return running;
     }
   };
 }]);

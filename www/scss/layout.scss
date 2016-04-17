@@ -142,6 +142,7 @@ $profile-page-width: 90rem;
   height: 31rem;
   padding-top: .01rem; // fix bug in some browsers. Margin of .profile-icon went outside .profile-header
   position: relative;
+  background-color: $background-color-dark;
   
   
   .profile-icon {
@@ -153,6 +154,8 @@ $profile-page-width: 90rem;
     
     box-shadow: 0 .7rem 1.4rem rgba(0, 0, 0, .29);
     border-radius: 100%;
+    
+    background-image: url("img/profileDefault.png");
   }
   
   .profile-icon-container {
