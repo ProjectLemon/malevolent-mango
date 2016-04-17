@@ -2,7 +2,8 @@
  * tokenRefresher refreshes the token which is used to authenticate
  * the user, ever few minutes.
  */
-app.factory('tokenRefresher', ['$interval', '$http', '$window', function($interval, $http, $window) {
+app.factory('tokenRefresher', ['$interval', '$http', '$window', 
+                       function($interval,   $http,   $window) {
   var refresher;
   var running = false;
   

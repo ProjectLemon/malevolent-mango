@@ -1,7 +1,8 @@
 /**
  * SignupController handles the signup form which creates a new user
  */
-app.controller('SignupController', ['$scope', '$http', '$window', 'tokenRefresher', function ($scope, $http, $window, tokenRefresher) {
+app.controller('SignupController', ['$scope', '$http', '$window', 'tokenRefresher', 
+                           function ($scope,   $http,   $window,   tokenRefresher) {
   // Declare variables
   $scope.user = {};
   $scope.message = '';

@@ -3,7 +3,8 @@
  * by adding the token user get when they log in (if they have any).
  * It will authorize users to get certain privileges.
  */
-app.factory('authenticationInterceptor', ['$rootScope', '$q', '$window', function ($rootScope, $q, $window) {
+app.factory('authenticationInterceptor', ['$rootScope', '$q', '$window',
+                                 function ($rootScope,   $q,   $window) {
   return {
     request: function (config) {
       config.headers = config.headers || {};

@@ -1,7 +1,8 @@
 /**
  * LoginController handles the login form, and send the data to server for confirmation
  */
-app.controller('LoginController', ['$scope', '$http', '$window', 'tokenRefresher', function ($scope, $http, $window, tokenRefresher) {
+app.controller('LoginController', ['$scope', '$http', '$window', 'tokenRefresher', 
+                          function ($scope,   $http,   $window,   tokenRefresher) {
   // Declare variables
   $scope.user = {};
   $scope.message = '';
