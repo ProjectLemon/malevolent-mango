@@ -163,7 +163,30 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func refreshToken(w http.ResponseWriter, r *http.Request) {
-
+	user, err := handleToken(w, r)
+	if err != nil {
+		return
+	}
+	user, err = db.GetUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	token, err := generateToken(user.UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Unable to provide webtoken"))
+		return
+	}
+	user.Token = token
+	err = db.UpdateUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err)
+		w.Write([]byte("Unable to update token value in database"))
+		return
+	}
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
