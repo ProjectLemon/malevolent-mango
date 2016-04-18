@@ -60,6 +60,7 @@ func main() {
 	http.HandleFunc("/api/login", login)
 	http.HandleFunc("/api/logout", logout)
 	http.HandleFunc("/api/register", register)
+	http.HandleFunc("/api/refreshtoken", refreshToken)
 	http.HandleFunc("/api/profile/save", saveProfile)
 	http.HandleFunc("/api/profile/get-edit", getProfileEdit)
 	http.HandleFunc("/api/profile/get-view", getProfileView)
@@ -161,6 +162,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func refreshToken(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func logout(w http.ResponseWriter, r *http.Request) {
 	//TODO: Implement
 }
@@ -213,8 +218,28 @@ func getProfileView(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+	writeUserContentToClient(w, r, user)
+}
+
+//Validates token and returns a profile to client for edit
+func getProfileEdit(w http.ResponseWriter, r *http.Request) {
+	if db == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("No database associated"))
+		return
+	}
+
+	user, err := handleToken(w, r) //feedback to client happens inside function
+	if err != nil {
+		return
+	}
+	writeUserContentToClient(w, r, user)
+}
+
+//Writes UserContent from database to client
+func writeUserContentToClient(w http.ResponseWriter, r *http.Request, user *User) {
 	userContent := new(UserContents)
-	userContent, err = db.GetUserContents(user.UserID, userContent)
+	userContent, err := db.GetUserContents(user.UserID, userContent)
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusNoContent)
@@ -230,21 +255,6 @@ func getProfileView(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(JSON)
-}
-
-//Validates token and returns a profile to client for edit
-func getProfileEdit(w http.ResponseWriter, r *http.Request) {
-	if db == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("No database associated"))
-		return
-	}
-
-	_, err := handleToken(w, r) //feedback to client happens inside function
-	if err != nil {
-		return
-	}
-
 }
 
 //Serves the profile into database
@@ -346,12 +356,13 @@ func validateEmail(email string) error {
 //returns a user containing token and user session
 func handleToken(w http.ResponseWriter, r *http.Request) (*User, error) {
 	user := new(User)
-	user.Token = strings.Split(r.Header.Get("Authorization"), " ")[1] //FIXME: Bug occurs here
-	if user.Token == "" {
+	providedTokens := strings.Split(r.Header.Get("Authorization"), " ")
+	if len(providedTokens) != 2 {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No token provided"))
-		return nil, errors.New("No token provided")
+		w.Write([]byte("Invlaid number of tokens provided"))
+		return nil, errors.New("Invlaid number of tokens provided")
 	}
+	user.Token = providedTokens[1]
 
 	user, err := db.GetUserSession(user)
 	if err != nil {
