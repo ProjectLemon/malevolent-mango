@@ -156,12 +156,16 @@ func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserConte
 func (dbi *DatabaseInterface) UpdateUserContent(uid string, uc *UserContents) error {
 	var buffer bytes.Buffer
 
+	invalidContent := validateUserContent(uc)
+	if invalidContent {
+		return errors.New("Invalid content")
+	}
+
 	for i := 0; i < len(uc.PDFs); i++ {
 		buffer.WriteString(uc.PDFs[i].String())
 	}
 
 	_, err := dbi.DB.Exec("UPDATE UserContent set UserId='" + uid + "', FullName='" + uc.FullName + "', Phone='" + uc.Phone + "', EMail='" + uc.EMail + "', ProfileIcon='" + uc.ProfileIcon + "', ProfileHeader='" + uc.ProfileHeader + "', Description='" + uc.Description + "', PDFs='" + buffer.String() + "' WHERE UserId='" + uid + "';")
-	fmt.Println(err)
 	return err
 }
 
@@ -237,4 +241,14 @@ func getStringArray(arr []uint8) []PDF {
 	var pdfs []PDF
 	json.Unmarshal([]byte(str), &pdfs)
 	return pdfs
+}
+
+func validateUserContent(uc *UserContents) bool {
+	return !(len(uc.FullName) < 70 &&
+		len(uc.Phone) < 50 &&
+		len(uc.EMail) < 80 &&
+		len(uc.ProfileIcon) < 150 &&
+		len(uc.ProfileHeader) < 150 &&
+		len(uc.Description) < 360 &&
+		len(uc.PDFs) < 21844)
 }

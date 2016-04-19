@@ -316,8 +316,12 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("No active session"))
 		return
 	}
-	// TODO implement validation before UpdateUserContent call
-	db.UpdateUserContent(user.UserID, userContent)
+	err = db.UpdateUserContent(user.UserID, userContent)
+	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte(err.Error()))
+		return
+	}
 }
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
