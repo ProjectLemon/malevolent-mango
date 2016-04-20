@@ -192,8 +192,26 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	writeToken(w, r, user)
 }
 
+//Removes the active session for the user in database which will
+//make the rest of the code treat the user as not logged in
 func logout(w http.ResponseWriter, r *http.Request) {
-	//TODO: Implement
+	user, err := handleToken(w, r)
+	if err != nil {
+		return
+	}
+	user, err = db.GetUserSession(user)
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("Not logged in"))
+		return
+	}
+	err = db.RemoveUserSession(user.Session)
+	if err != nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("Not currently logged in"))
+		return
+	}
+
 }
 
 //Encrypts the users password and registers it in the database
