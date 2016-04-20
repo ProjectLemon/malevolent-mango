@@ -1,10 +1,11 @@
-var app = angular.module('MaliciousMango', ['ngRoute', 'ngAnimate', 'lr.upload']);
+var app = angular.module('MaliciousMango', ['ngRoute', 'ngAnimate', 'lr.upload', 'toastr']);
 
 app.run(['tokenRefresher', function(tokenRefresher) {
   tokenRefresher.start(); // will start if neccesary
 }]);
 
-app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) { 
+app.config(['$routeProvider', '$locationProvider', 
+   function ($routeProvider,   $locationProvider) { 
   // $locationProvider.html5Mode(true); // to be used later to remove # in url
 
   /* This is where all pages is specified */
@@ -35,5 +36,4 @@ app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     .otherwise({ 
       redirectTo: '/' 
     }); 
-    
 }]);
