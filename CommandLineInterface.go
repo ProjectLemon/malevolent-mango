@@ -10,17 +10,22 @@ import (
 	"time"
 )
 
-func commandLineInterface() {
+func commandLineInterface(quit chan bool) {
 	printWelcome()
 	catchCtrlC()
 
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Print("mango> ")
-		text, _ := reader.ReadString('\n')
-		text = strings.ToLower(text)
-		text = strings.Replace(text, "\n", "", -1)
-		handle(text)
+		select {
+		case <-quit:
+			return
+		default:
+			fmt.Print("mango> ")
+			text, _ := reader.ReadString('\n')
+			text = strings.ToLower(text)
+			text = strings.Replace(text, "\n", "", -1)
+			handle(text)
+		}
 	}
 }
 

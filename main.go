@@ -34,6 +34,7 @@ var (
 	db *DatabaseInterface
 
 	_startTime = time.Now() //Last restart
+	quit       = make(chan bool)
 	secretKey  string
 )
 
@@ -52,7 +53,8 @@ func main() {
 	//Setup back-end
 	secretKey = randBase64String(128)
 	db = connectToDatabase()
-	go commandLineInterface()
+	go commandLineInterface(quit)
+	go SessionCleaner(quit)
 	fmt.Println("Server is running!")
 	fmt.Println("Listening on PORT: " + port)
 
@@ -187,6 +189,7 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Unable to update token value in database"))
 		return
 	}
+	writeToken(w, r, user)
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
@@ -319,6 +322,7 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 	err = db.UpdateUserContent(user.UserID, userContent)
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
+		fmt.Println(err)
 		w.Write([]byte(err.Error()))
 		return
 	}
@@ -482,5 +486,6 @@ func closeServer() {
 	if db != nil {
 		db.CloseConnection()
 	}
+	close(quit)
 	os.Exit(0)
 }
