@@ -214,6 +214,42 @@ func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
 	return nil, ErrNoActiveSession
 }
 
+//RemoveUserSession removes the session entry in database
+//that has the provided session key
+func (dbi *DatabaseInterface) RemoveUserSession(session *UserSession) error {
+	_, err := dbi.DB.Exec("DELETE FROM UserSession WHERE SessionKey='" + session.SessionKey + "'")
+	return err
+}
+
+//CleanUserSession gets the user sessions that has a larger last seen time
+//than 10 minutes
+func (dbi *DatabaseInterface) CleanUserSession() error {
+	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE LastSeenTime <= '" + (time.Now().Add(time.Minute * -10)).Format(time.RFC3339) + "'")
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	userSession := new(UserSession)
+	for rows.Next() {
+		err := rows.Scan(
+			&userSession.SessionKey,
+			new(string),
+			&userSession.LoginTime,
+			&userSession.LastSeen)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+		err = dbi.RemoveUserSession(userSession)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+	return err
+}
+
 //CloseConnection closes any active connection to the current database
 func (dbi *DatabaseInterface) CloseConnection() {
 	dbi.DB.Close()
