@@ -84,7 +84,7 @@ func main() {
 }
 
 // ---- Start of temp, for uploading files with profile ----
-// TODO Remove
+//TODO: Rewrite for our purpose
 func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
 	time.Sleep(3 * time.Second)
 

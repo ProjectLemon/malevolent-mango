@@ -8,7 +8,7 @@ func SessionCleaner(quit chan bool) {
 		case <-quit:
 			return
 		default:
-			time.Sleep(time.Minute * 1)
+			time.Sleep(time.Minute * 10)
 			db.CleanUserSession()
 		}
 	}
