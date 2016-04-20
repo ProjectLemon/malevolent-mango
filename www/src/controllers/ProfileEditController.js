@@ -2,7 +2,7 @@
  * ProfileEditController handles the edit page for the user profile.
  * Will get info from server, handle edits, and then push changes back to server
  */
-app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout', 
+app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout',
                                 function ($scope,   $http,   $window,   $timeout) {
   // Declare variables
   $scope.user = { // Placeholder
@@ -38,6 +38,11 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     function(response) {
       if (response.status == 401) {
         $scope.message = 'You don\'t have permission to access this content'; 
+        
+      } else if (response.status == 400) {
+        $scope.message = 'You are not logged in';
+        $window.location.href = '/'; // return to start page
+    
       } else {
         $scope.message = 'User is not found'; 
       }
