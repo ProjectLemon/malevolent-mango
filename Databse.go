@@ -176,6 +176,12 @@ func (dbi *DatabaseInterface) InsertUserSession(user *User) error {
 	return err
 }
 
+//UpdateUserSession overwrites the current token value and last seen time in database
+func (dbi *DatabaseInterface) UpdateUserSession(user *User) error {
+	_, err := dbi.DB.Exec("UPDATE UserSession set SessionKey='" + user.Token + "', LastSeenTime='" + time.Now().Format(time.RFC3339) + "' WHERE UserId ='" + user.UserID + "';")
+	return err
+}
+
 //GetUserSession reads the user session for the specified user
 //into the user session field of the struct
 func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
