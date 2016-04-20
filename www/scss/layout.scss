@@ -136,6 +136,11 @@ $profile-page-width: 90rem;
   margin: auto;
   box-shadow: 0 .2rem 1rem rgba(0, 0, 0, .21);
 
+  h1, h2, p {
+    &[contenteditable]:focus {
+      outline: none;
+    }
+  }
 }
 .profile-header {
   width: 100%;
@@ -154,8 +159,6 @@ $profile-page-width: 90rem;
     
     box-shadow: 0 .7rem 1.4rem rgba(0, 0, 0, .29);
     border-radius: 100%;
-    
-    background-image: url("img/profileDefault.png");
   }
   
   .profile-icon-container {
