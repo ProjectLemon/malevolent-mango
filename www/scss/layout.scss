@@ -355,5 +355,10 @@ $profile-confirmation-bg-color: #406A85;
 .pdf {
   height: 80rem; // TODO placeholder
   background: $background-color-dark;
+  
+  embed {
+    width: 100%;
+    height: 100%;
+  }
 }
 
