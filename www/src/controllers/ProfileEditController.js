@@ -18,7 +18,8 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
       ]
   };
   $scope.message = '';
-  $scope.loading = {header: false, icon: false};
+  $scope.currentPDF = 0;
+  $scope.loading = {header: false, icon: false, pdf: false};
 
 
   //Do a http request to server
@@ -31,6 +32,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
       } else {
         if (response.data != '') {
           $scope.user = response.data;
+          $scope.currentPDF = 0;
         }
       }
     },
@@ -47,26 +49,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
         $scope.message = 'User is not found'; 
       }
     }
-  )
-
-  $scope.changeBackground = function(response) {
-    $scope.user.ProfileHeader = response.data;
-  }
-  $scope.changeProfileIcon = function(response) {
-    $scope.user.ProfileIcon = response.data;
-  }
-  $scope.startUploadHeader = function(response) {
-    $scope.loading.header = true;
-  }
-  $scope.startUploadIcon = function(response) {
-    $scope.loading.icon = true;
-  }
-  $scope.endUploadHeader = function(response) {
-    $scope.loading.header = false;
-  }
-  $scope.endUploadIcon = function(response) {
-    $scope.loading.icon = false;
-  }
+  );
   
   $scope.publish = function() {
     $http.post('api/profile/save', $scope.user).then(
@@ -77,5 +60,35 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
         $scope.message = 'Saved failed';
       }
     );
+  };
+
+  $scope.changeBackground = function(response) {
+    $scope.user.ProfileHeader = response.data;
   }
+  $scope.changeProfileIcon = function(response) {
+    $scope.user.ProfileIcon = response.data;
+  }
+  $scope.changeProfileIcon = function(response) {
+    $scope.user.PDFs.push({Title: 'Unnamed', Path: response.data});
+    $scope.currentPDF = $scope.user.PDFs.length-1;
+  }
+  
+  $scope.startUploadHeader = function(response) {
+    $scope.loading.header = true;
+  }
+  $scope.startUploadIcon = function(response) {
+    $scope.loading.icon = true;
+  }
+  $scope.startUploadPdf = function(response) {
+    $scope.loading.pdf = true;
+  } 
+  $scope.endUploadHeader = function(response) {
+    $scope.loading.header = false;
+  }
+  $scope.endUploadIcon = function(response) {
+    $scope.loading.icon = false;
+  } 
+  $scope.endUploadPDF = function(response) {
+    $scope.loading.pdf = false;
+  }  
 }]);
