@@ -20,6 +20,15 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   $scope.message = '';
   $scope.currentPDF = 0;
   $scope.loading = {header: false, icon: false, pdf: false};
+  $scope.maxLength = {
+    fullName: 70,
+    email: 50,
+    phone: 80,
+    description: 150,
+    profileIcon: 150,
+    profileHeader: 360,
+    pdfs: 21844
+  }
 
 
   //Do a http request to server
@@ -28,7 +37,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     // Get user information from server and puts it in the user variable
     function (response) {
       if (response.status == 204) {
-        
+
       } else {
         if (response.data != '') {
           $scope.user = response.data;
@@ -39,22 +48,24 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     //If Error
     function(response) {
       if (response.status == 401) {
-        $scope.message = 'You don\'t have permission to access this content'; 
-        
+        $scope.message = 'You don\'t have permission to access this content';
+
       } else if (response.status == 400) {
         $scope.message = 'You are not logged in';
         $window.location.href = '/'; // return to start page
-    
+
+      } else if (response.status == 413) {
+
       } else {
-        $scope.message = 'User is not found'; 
+        $scope.message = 'User is not found';
       }
     }
   );
-  
+
   $scope.publish = function() {
     $http.post('api/profile/save', $scope.user).then(
       function success(response) {
-        $scope.message = 'Saved Success'; 
+        $scope.message = 'Saved Success';
       },
       function error(response) {
         $scope.message = 'Saved failed';
@@ -72,7 +83,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     $scope.user.PDFs.push({Title: 'Unnamed', Path: response.data});
     $scope.currentPDF = $scope.user.PDFs.length-1;
   }
-  
+
   $scope.startUploadHeader = function(response) {
     $scope.loading.header = true;
   }
@@ -81,14 +92,14 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   }
   $scope.startUploadPdf = function(response) {
     $scope.loading.pdf = true;
-  } 
+  }
   $scope.endUploadHeader = function(response) {
     $scope.loading.header = false;
   }
   $scope.endUploadIcon = function(response) {
     $scope.loading.icon = false;
-  } 
+  }
   $scope.endUploadPDF = function(response) {
     $scope.loading.pdf = false;
-  }  
+  }
 }]);
