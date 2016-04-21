@@ -177,12 +177,6 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	user, err = db.GetUserSession(user)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(err.Error()))
-		return
-	}
 	token, err := generateToken(user.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -358,7 +352,7 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 func generateToken(userID string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["uid"] = userID
-	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
+	token.Claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		fmt.Println(err)
