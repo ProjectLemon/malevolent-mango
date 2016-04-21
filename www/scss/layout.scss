@@ -149,6 +149,15 @@ $profile-page-width: 90rem;
   position: relative;
   background-color: $background-color-dark;
   
+  &:before {
+    content: " ";
+    display: inline-block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.08) 11%, rgba(0,0,0,0.02) 20%, rgba(0,0,0,0.10) 40%, rgba(0,0,0,0.30) 100%);
+  }
+  
   
   .profile-icon {
     width: 15rem;
@@ -174,6 +183,16 @@ $profile-page-width: 90rem;
       left: 25%;
     }
   }
+  
+  .logout {
+    position: absolute;
+    right: 0;
+    color: white;
+    margin: 2rem 3rem;
+    z-index: 0;
+    font-weight: $font-weight-bold;
+  }
+  
   .fullname {
     text-align: center;
     font-weight: $font-weight-medium;

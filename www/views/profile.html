@@ -1,6 +1,6 @@
 ﻿<section class="profile-content">
 
-  <header class="profile-header" background-image="{{ user.ProfileHeader }}">
+  <header class="profile-header" background-image="{{ user.ProfileHeader }}" path="user.ProfileHeader">
     <img class="profile-icon" src="{{ user.ProfileIcon }}" alt="Profile picture">
     <h1 class="fullname">{{ user.FullName }}</h1>
 
@@ -9,7 +9,7 @@
    --><p class="phone">{{ user.Phone }}</p>
     </div>
     
-    <p class="served-by">Served by: <a href="/">Malicious Mango</a></p>
+    <p class="served-by">Served by: <a href="#/">Malicious Mango</a></p>
   </header>
   
   <div class="profile-body">
