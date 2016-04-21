@@ -26,11 +26,11 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
     // Get user information from server and puts it in the user variable
     function (response) {
       if (response.status == 204) {
+        $scope.message = 'User is not found';
+        $window.location.href = '#/'
         
-      } else {
-        if (response.data != '') {
-          $scope.user = response.data;
-        }
+      } else if (response.data != '') {
+        $scope.user = response.data;
       }
     },
     // If Error
