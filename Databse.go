@@ -71,7 +71,7 @@ func (dbi *DatabaseInterface) OpenConnection() error {
 //LookupUser sends a query to the database for the specified
 //username and password hash. Returns error if query failed
 func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = '" + user.Email + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = ?", user.Email)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -120,7 +120,7 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 
 //GetUserContents looks up, and return, user content in database
 func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserContents) (*UserContents, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE UserId='" + uid + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE UserId=?", uid)
 	if err != nil {
 		return nil, err
 	}
@@ -160,12 +160,23 @@ func (dbi *DatabaseInterface) UpdateUserContent(uid string, uc *UserContents) er
 	if invalidContent {
 		return errors.New("Invalid content")
 	}
-
+	buffer.WriteRune('[')
 	for i := 0; i < len(uc.PDFs); i++ {
 		buffer.WriteString(uc.PDFs[i].String())
+		buffer.WriteRune(',')
 	}
+	buffer.WriteRune(']')
 
-	_, err := dbi.DB.Exec("UPDATE UserContent set UserId='" + uid + "', FullName='" + uc.FullName + "', Phone='" + uc.Phone + "', EMail='" + uc.EMail + "', ProfileIcon='" + uc.ProfileIcon + "', ProfileHeader='" + uc.ProfileHeader + "', Description='" + uc.Description + "', PDFs='" + buffer.String() + "' WHERE UserId='" + uid + "';")
+	_, err := dbi.DB.Exec("UPDATE UserContent set UserId=?, FullName=?, Phone=?, EMail=?, ProfileIcon=?, ProfileHeader=?, Description=?, PDFs=? WHERE UserId=?;",
+		uid,
+		uc.FullName,
+		uc.Phone,
+		uc.EMail,
+		uc.ProfileIcon,
+		uc.ProfileHeader,
+		uc.Description,
+		buffer.String(),
+		uid)
 	return err
 }
 
@@ -182,14 +193,14 @@ func (dbi *DatabaseInterface) InsertUserSession(user *User) error {
 
 //UpdateUserSession overwrites the current token value and last seen time in database
 func (dbi *DatabaseInterface) UpdateUserSession(user *User) error {
-	_, err := dbi.DB.Exec("UPDATE UserSession set SessionKey='" + user.Token + "', LastSeenTime='" + time.Now().Format(time.RFC3339) + "' WHERE UserId ='" + user.UserID + "';")
+	_, err := dbi.DB.Exec("UPDATE UserSession set SessionKey=?, LastSeenTime=? WHERE UserId =?;", user.Token, time.Now().Format(time.RFC3339), user.UserID)
 	return err
 }
 
 //GetUserSession reads the user session for the specified user
 //into the user session field of the struct
 func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE SessionKey='" + user.Token + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE SessionKey=?", user.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -217,14 +228,14 @@ func (dbi *DatabaseInterface) GetUserSession(user *User) (*User, error) {
 //RemoveUserSession removes the session entry in database
 //that has the provided session key
 func (dbi *DatabaseInterface) RemoveUserSession(session *UserSession) error {
-	_, err := dbi.DB.Exec("DELETE FROM UserSession WHERE SessionKey='" + session.SessionKey + "'")
+	_, err := dbi.DB.Exec("DELETE FROM UserSession WHERE SessionKey=?", session.SessionKey)
 	return err
 }
 
 //CleanUserSession gets the user sessions that has a larger last seen time
 //than 10 minutes
 func (dbi *DatabaseInterface) CleanUserSession() error {
-	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE LastSeenTime <= '" + (time.Now().Add(time.Minute * -10)).Format(time.RFC3339) + "'")
+	rows, err := dbi.DB.Query("SELECT * FROM UserSession WHERE LastSeenTime <= ?", (time.Now().Add(time.Minute * -10)).Format(time.RFC3339))
 	if err != nil {
 		return err
 	}
