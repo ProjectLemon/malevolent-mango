@@ -6,15 +6,15 @@ app.directive('fileUploadButton', function() {
   return {
     link: function(scope, element, attributes) {
 
-      var el = angular.element(element)
-      var button = el.children()[0]
+      var el = angular.element(element);
+      var button = el.children()[0];
 
       el.css({
         position: 'relative',
         overflow: 'hidden',
-      })
+      });
 
-      var fileInput = angular.element('<input type="file" multiple />')
+      var fileInput = angular.element('<input type="file" multiple />');
       fileInput.css({
         position: 'absolute',
         top: 0,
@@ -24,9 +24,9 @@ app.directive('fileUploadButton', function() {
         height: '100%',
         opacity: '0',
         cursor: 'pointer'
-      })
+      });
 
-      el.append(fileInput)
+      el.append(fileInput);
     }
-  }
+  };
 });
