@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	_version = 0.2
+	_version = 0.3
 	port     = "8080"
 )
 
