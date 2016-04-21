@@ -67,6 +67,7 @@ func main() {
 	http.HandleFunc("/api/profile/get-edit", getProfileEdit)
 	http.HandleFunc("/api/profile/get-view", getProfileView)
 
+	http.HandleFunc("/api/upload/pdf", receiveUploadPDF)
 	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
 	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
 
@@ -86,8 +87,6 @@ func main() {
 // ---- Start of temp, for uploading files with profile ----
 //TODO: Rewrite for our purpose
 func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(3 * time.Second)
-
 	path, err := saveFile("img/profile-headers/", r)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -96,8 +95,6 @@ func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Upoaded header:", path)
 }
 func receiveUploadIcon(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(1 * time.Second)
-
 	path, err := saveFile("img/profile-icons/", r)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -106,6 +103,17 @@ func receiveUploadIcon(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(path))
 	fmt.Println("Uploaded icon:", path)
 }
+
+func receiveUploadPDF(w http.ResponseWriter, r *http.Request) {
+	path, err := saveFile("pdf/", r)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	w.Write([]byte(path))
+	fmt.Println("Uploaded pdf:", path)
+}
+
 func saveFile(folder string, r *http.Request) (string, error) {
 	r.ParseMultipartForm(32 << 20)
 	file, handler, err := r.FormFile("file")
