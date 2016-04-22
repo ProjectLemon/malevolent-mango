@@ -7,22 +7,22 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
   var refresher;
   var running = false;
   var tryOnMoreTime = 0;
-  
-  
+
+
   /**
    * start starts the refreshing of the token
    */
   start = function() {
     if (!running && $window.sessionStorage.getItem('token') != undefined) {
-      refresher = $interval(this.refresh, 5000);//4*60*1000); // every 4 minutes
+      refresher = $interval(this.refresh, 1*60*1000);//4*60*1000); // every 4 minutes
       running = true;
     }
   };
-  
+
   /**
    * stop stops the refreshing of the token. Returns true is sucessful,
    * otherwise false.
-   */  
+   */
   stop = function() {
     if (running) {
       running = false;
@@ -31,7 +31,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
       return true;
     }
   };
-  
+
   /**
    * refresh makes a one time refresh of the token
    */
@@ -49,16 +49,16 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
         if (response.data.Token !== undefined) {
           /* Complete success */
           $window.sessionStorage.setItem('token', response.data.Token);
-          
+
         } else {
           /* No server response */
           // try one more time
-          
+
           if (tryOnMoreTime > 0) {
             toastr.error('Server error. Please log in again');
             $window.sessionStorage.removeItem('token');
             stop();
-            
+
           } else {
             tryOnMoreTime++;
             refresh();
@@ -79,9 +79,9 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
   isRunning = function() {
     return running;
   };
-  
-  
-  return {    
+
+
+  return {
     start: start,
     stop: stop,
     refresh: refresh,

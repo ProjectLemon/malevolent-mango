@@ -18,6 +18,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gebi/scryptauth"
+	"github.com/kennygrant/sanitize"
 	"github.com/nytimes/gziphandler" //We might need some sort of license for this
 	"golang.org/x/crypto/scrypt"
 )
@@ -87,6 +88,7 @@ func main() {
 // ---- Start of temp, for uploading files with profile ----
 //TODO: Rewrite for our purpose
 func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
+
 	path, err := saveFile("img/profile-headers/", r)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -122,6 +124,10 @@ func saveFile(folder string, r *http.Request) (string, error) {
 	}
 	defer file.Close()
 	path := folder + handler.Filename
+	path = sanitize.Path(path)
+	if err != nil {
+		return "", err
+	}
 	f, err := os.OpenFile("www/"+path, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return "", err
@@ -177,13 +183,8 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	token, err := generateToken(user.UserID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Unable to provide webtoken"))
-		return
-	}
-	user.Token = token
+
+	writeToken(w, r, user)
 	err = db.UpdateUserSession(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -191,7 +192,6 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Unable to update token value in database"))
 		return
 	}
-	writeToken(w, r, user)
 }
 
 //Removes the active session for the user in database which will
@@ -341,7 +341,7 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	err = db.UpdateUserContent(user.UserID, userContent)
 	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
 		fmt.Println(err)
 		w.Write([]byte(err.Error()))
 		return
@@ -352,7 +352,7 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 func generateToken(userID string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["uid"] = userID
-	token.Claims["exp"] = time.Now().Add(time.Minute * 1).Unix()
+	token.Claims["exp"] = time.Now().Add(time.Minute * 2).Unix()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		fmt.Println(err)

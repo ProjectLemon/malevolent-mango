@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/kennygrant/sanitize"
 	"testing"
 )
 
@@ -71,6 +73,15 @@ func TestEmptyToken(t *testing.T) {
 	if valid {
 		t.Fatalf("Empty Token should not be valid")
 	}
+}
+
+func TestSanitizeFileName(t *testing.T) {
+	path := "File Name!"
+	newPath := sanitize.Path(path)
+	if newPath == path {
+		t.Fatalf("Sanitized string should not be equal to old string")
+	}
+	fmt.Println("Sanitized string: ", newPath)
 }
 
 //Benchmark tests
