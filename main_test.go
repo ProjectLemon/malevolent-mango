@@ -81,7 +81,40 @@ func TestSanitizeFileName(t *testing.T) {
 	if newPath == path {
 		t.Fatalf("Sanitized string should not be equal to old string")
 	}
-	fmt.Println("Sanitized string: ", newPath)
+}
+
+func TestUploadSanitizer(t *testing.T) {
+	path := "file-name.pdf"
+	newPath := sanitizeUploadFileName(path, path[(len(path)-4):])
+	if newPath != path {
+		t.Fatalf("ERROR: Strings should be equal")
+	}
+}
+
+func TestDatabaseContains(t *testing.T) {
+	db := connectToDatabase()
+	phrase := "hola"
+	contains, err := db.UniversalLookup(phrase)
+	if err != nil {
+		fmt.Println(err)
+		t.Fatalf("Recieved an unexpected error")
+	}
+	if !contains {
+		t.Fatalf("String should be present in database")
+	}
+}
+
+func TestDatabaseContainsFalse(t *testing.T) {
+	db := connectToDatabase()
+	phrase := "test@nonContain"
+	contains, err := db.UniversalLookup(phrase)
+	if err != nil {
+		fmt.Println(err)
+		t.Fatalf("Recieved an unexpected error")
+	}
+	if contains {
+		t.Fatalf("String should not be present in database")
+	}
 }
 
 //Benchmark tests
@@ -111,5 +144,13 @@ func BenchmarkValidateToken(b *testing.B) {
 	user := User{UserID: UserID, Session: &session}
 	for n := 0; n < b.N; n++ {
 		validateToken(&user)
+	}
+}
+
+func BenchmarkUniversalLookup(b *testing.B) {
+	db := connectToDatabase()
+	phrase := "test@nonContain"
+	for n := 0; n < b.N; n++ {
+		db.UniversalLookup(phrase)
 	}
 }
