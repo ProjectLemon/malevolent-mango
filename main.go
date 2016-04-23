@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -123,8 +124,8 @@ func saveFile(folder string, r *http.Request) (string, error) {
 		return "", err
 	}
 	defer file.Close()
+	handler.Filename = sanitizeUploadFileName(handler.Filename, handler.Filename[(len(handler.Filename)-4):])
 	path := folder + handler.Filename
-	path = sanitize.Path(path)
 	if err != nil {
 		return "", err
 	}
@@ -136,6 +137,24 @@ func saveFile(folder string, r *http.Request) (string, error) {
 	io.Copy(f, file)
 
 	return path, nil
+}
+
+func sanitizeUploadFileName(name, extension string) string {
+	if db != nil {
+		nameInDatabase, err := db.UniversalLookup(name)
+		if nameInDatabase || err != nil {
+			name = randBase64String(50)
+		}
+	}
+	if len(name) >= 150 {
+		var bytes bytes.Buffer
+		name = name[:50]
+		bytes.WriteString(name)
+		bytes.WriteString(extension)
+	}
+
+	path := sanitize.Path(name)
+	return path
 }
 
 // ---- End of temp ----
