@@ -79,7 +79,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
   $scope.changeProfileIcon = function(response) {
     $scope.user.ProfileIcon = response.data;
   }
-  $scope.changeProfileIcon = function(response) {
+  $scope.changePDF = function(response) {
     $scope.user.PDFs.push({Title: 'Unnamed', Path: response.data});
     $scope.currentPDF = $scope.user.PDFs.length-1;
   }

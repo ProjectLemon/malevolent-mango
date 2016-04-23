@@ -14,7 +14,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
    */
   start = function() {
     if (!running && $window.sessionStorage.getItem('token') != undefined) {
-      refresher = $interval(this.refresh, 1*60*1000);//4*60*1000); // every 4 minutes
+      refresher = $interval(this.refresh, .1*60*1000);//4*60*1000); // every 4 minutes
       running = true;
     }
   };
@@ -24,6 +24,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
    * otherwise false.
    */
   stop = function() {
+    tryOnMoreTime = 0;
     if (running) {
       running = false;
       return $interval.cancel(refresher);
@@ -55,7 +56,9 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
           // try one more time
 
           if (tryOnMoreTime > 0) {
-            toastr.error('Server error. Please log in again');
+            toastr.error('Server error. Please log in again', {
+              onTap: function() {$window.location.href = '#/login'}
+            });
             $window.sessionStorage.removeItem('token');
             stop();
 
@@ -67,7 +70,9 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
       },
       function error(response) {
         toastr.error('Lost connection to server. Please log in again');
-        $window.sessionStorage.removeItem('token');
+        $window.sessionStorage.removeItem('token', {
+              onTap: function() {$window.location.href = '#/login'}
+          });
         stop();
       }
     )

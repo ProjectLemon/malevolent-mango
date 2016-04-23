@@ -17,7 +17,7 @@ app.directive('pdfViewer', ['$compile', function($compile) {
       var currentElement = element;
       scope.$parent.$watch(scope.pdfs, function(newValue, oldValue) {
         var html;
-        if (newValue.length > 0) {
+        if (newValue && newValue.length > 0) {
           var pdf = newValue[scope.current];
           if (pdf != null) {
             html = '<embed src="'+pdf.Path+'" type="application/pdf">'
