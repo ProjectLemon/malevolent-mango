@@ -38,6 +38,8 @@ debug
 .idea/
 malicious-mango.iml
 keys/*
+www/img/profile-*
+www/pdf/
 
 # Sass
 .sass-cache
