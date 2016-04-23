@@ -68,6 +68,33 @@ func (dbi *DatabaseInterface) OpenConnection() error {
 	return nil
 }
 
+//UniversalLookup will query the database for the given string. It will
+//search through all the rows and columns in every table in the database.
+//This function should be considered expensive and be used with caution.
+func (dbi *DatabaseInterface) UniversalLookup(phrase string) (bool, error) {
+	//Were hardcoding the database structure into a map
+	// in order to boost performance by reducing sql-queries
+	tables := make(map[string][]string)
+	tables["Users"] = []string{"EMail", "UserId", "Password", "PasswordSalt"}
+	tables["UserSession"] = []string{"SessionKey", "UserId", "LoginTime", "LastSeenTime"}
+	tables["UserContent"] = []string{"UserId", "FullName", "Phone", "EMail", "ProfileIcon", "ProfileHeader", "Description", "PDFs"}
+
+	for tableName, columnNames := range tables {
+		for i := 0; i < len(columnNames); i++ {
+			rows, err := dbi.DB.Query("SELECT * FROM "+tableName+" WHERE "+columnNames[i]+"=?", phrase)
+			if err != nil {
+				return false, err
+			}
+			for rows.Next() {
+				rows.Close()
+				return true, nil
+			}
+			rows.Close()
+		}
+	}
+	return false, nil
+}
+
 //LookupUser sends a query to the database for the specified
 //username and password hash. Returns error if query failed
 func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
@@ -151,7 +178,7 @@ func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserConte
 	return nil, ErrNoContentInDatabase
 }
 
-//UpdateUserContents inserts the specified UserContent
+//UpdateUserContent inserts the specified UserContent
 //for the specified UserId into the database
 func (dbi *DatabaseInterface) UpdateUserContent(uid string, uc *UserContents) error {
 	var buffer bytes.Buffer
