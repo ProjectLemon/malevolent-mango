@@ -189,7 +189,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	//Authenticate user and provide a jwt
 	allowed := authenticatePassword(user, passString)
 	if allowed {
-		writeToken(w, r, user)
+		writeNewToken(w, r, user)
 		db.InsertUserSession(user)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
@@ -203,7 +203,7 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeToken(w, r, user)
+	writeNewToken(w, r, user)
 	err = db.UpdateUserSession(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -260,7 +260,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("User already registered"))
 			return
 		}
-		writeToken(w, r, user)
+		writeNewToken(w, r, user)
 		db.InsertUserSession(user)
 	}
 }
@@ -476,7 +476,7 @@ func validateToken(user *User) (bool, *jwt.Token) {
 }
 
 //Generates a token and writes it to the client
-func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
+func writeNewToken(w http.ResponseWriter, r *http.Request, user *User) {
 	token, err := generateToken(user.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
