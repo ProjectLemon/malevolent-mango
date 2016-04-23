@@ -77,11 +77,13 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$timeout
     $scope.user.ProfileHeader = response.data;
   }
   $scope.changeProfileIcon = function(response) {
-    $scope.user.ProfileIcon = response.data;
+    $scope.user.ProfileIcon = response.data //This is never run?
   }
   $scope.changeProfileIcon = function(response) {
-    $scope.user.PDFs.push({Title: 'Unnamed', Path: response.data});
-    $scope.currentPDF = $scope.user.PDFs.length-1;
+    try {
+        $scope.user.PDFs.push({Title: 'Unnamed', Path: response.data});
+        $scope.currentPDF = $scope.user.PDFs.length-1;
+    } catch (e) {}
   }
 
   $scope.startUploadHeader = function(response) {
