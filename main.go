@@ -57,6 +57,7 @@ func main() {
 	db = connectToDatabase()
 	go commandLineInterface(quit)
 	go SessionCleaner(quit)
+	go ImageCleaner(quit)
 	fmt.Println("Server is running!")
 	fmt.Println("Listening on PORT: " + port)
 
