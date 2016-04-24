@@ -17,6 +17,7 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
       PDFs: [
       ]
   };
+  $scope.currentPDF = 0;
   $scope.message = '';
 
 
@@ -31,6 +32,7 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
         
       } else if (response.data != '') {
         $scope.user = response.data;
+        $scope.currentPDF = 0;
       }
     },
     // If Error
