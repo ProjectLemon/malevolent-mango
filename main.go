@@ -155,6 +155,7 @@ func sanitizeUploadFileName(name, extension string) string {
 	}
 
 	path := sanitize.Path(name)
+	path = path + extension
 	return path
 }
 

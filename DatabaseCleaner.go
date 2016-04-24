@@ -29,7 +29,7 @@ func ImageCleaner(quit chan bool) {
 		case <-quit:
 			return
 		default:
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Hour * 24)
 			profileHeaders, err := filepath.Glob("www/img/profile-headers/*")
 			if err != nil {
 				fmt.Println(err)
