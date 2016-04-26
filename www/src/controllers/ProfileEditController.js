@@ -19,6 +19,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   };
   $scope.message = '';
   $scope.currentPDF = 0;
+  $scope.saved = true;
   $scope.loading = {header: false, icon: false, pdf: false};
   $scope.maxLength = {
     fullName: 70,
@@ -29,24 +30,43 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
     profileHeader: 360,
     pdfs: 21844
   }
+  
 
-
-  //Do a http request to server
-  $http.get('/api/profile/get-edit').then(
-    //If success
-    // Get user information from server and puts it in the user variable
-    function (response) {
-      if (response.status == 204) {
-
-      } else {
-        if (response.data != '') {
-          $scope.user = response.data;
-          $scope.currentPDF = 0;
+  /* Notify user that changes not saved (on window close) */
+  var checkIfSaved = function() {
+    $scope.$watch('user', function(newValue, oldValue) {
+        if (newValue != oldValue) {
+          $scope.saved = false;
         }
+      }, true); // true to check for value equality
+    
+    var preventClosingIfNotSaved = function(event) {
+      if ($scope.saved == false) {
+        event.returnValue = "Warning. You have not published your changes. Leaving this page will remove all changes."
+      }
+    };
+    if (window.addEventListener) {
+      window.addEventListener("beforeunload", preventClosingIfNotSaved);
+    } else {
+      // For IE browsers
+      window.attachEvent("onbeforeunload", preventClosingIfNotSaved);
+    }
+  };
+
+
+
+  /* Do a http request to server*/
+  $http.get('/api/profile/get-edit').then(
+
+    // Get user information from server and puts it in the user variable
+    function success(response) {
+      if (response.data != '') {
+        $scope.user = response.data;
+        $scope.currentPDF = 0;
+        checkIfSaved();
       }
     },
-    //If Error
-    function(response) {
+    function error(response) {
       if (response.status == 401) {
         $scope.message = 'You don\'t have permission to access this content';
 
@@ -62,20 +82,22 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
     }
   );
 
+  /* Publish changes to server */
   $scope.publish = function() {
     $http.post('api/profile/save', $scope.user).then(
       function success(response) {
-        oldMessage = $scope.message;
+        var oldMessage = $scope.message;
         $scope.message = 'Saved Success';
+        $scope.saved = true;
         $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
       },
       function error(response) {
-        oldMessage = $scope.message;
+        var oldMessage = $scope.message;
         $scope.message = 'Saved failed';
         $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
       }
     );
-  };
+  };  
 
   $scope.changeBackground = function(response) {
     $scope.user.ProfileHeader = response.data;

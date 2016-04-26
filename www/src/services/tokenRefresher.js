@@ -12,7 +12,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
   /**
    * start starts the refreshing of the token
    */
-  start = function() {
+  var start = function() {
     if (!running && $window.sessionStorage.getItem('token') != undefined) {
       refresher = $interval(this.refresh, .1*60*1000);//4*60*1000); // every 4 minutes
       running = true;
@@ -23,7 +23,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
    * stop stops the refreshing of the token. Returns true is sucessful,
    * otherwise false.
    */
-  stop = function() {
+  var stop = function() {
     tryOnMoreTime = 0;
     if (running) {
       running = false;
@@ -36,7 +36,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
   /**
    * refresh makes a one time refresh of the token
    */
-  refresh = function() {
+  var refresh = function() {
     $http.get('/api/refreshtoken').then(
       function success(response) {
         /* The response object has these properties:
@@ -81,7 +81,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
   /**
    * isRunning returns true if tokenRefresher is running, false, otherwise
    */
-  isRunning = function() {
+  var isRunning = function() {
     return running;
   };
 
