@@ -190,7 +190,10 @@ func (dbi *DatabaseInterface) UpdateUserContent(uid string, uc *UserContents) er
 	buffer.WriteRune('[')
 	for i := 0; i < len(uc.PDFs); i++ {
 		buffer.WriteString(uc.PDFs[i].String())
-		buffer.WriteRune(',')
+
+		if i < (len(uc.PDFs) - 1) { // don't add comma after last entry
+			buffer.WriteRune(',')
+		}
 	}
 	buffer.WriteRune(']')
 
