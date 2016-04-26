@@ -2,8 +2,8 @@
  * ProfileEditController handles the edit page for the user profile.
  * Will get info from server, handle edits, and then push changes back to server
  */
-app.controller('ProfileEditController', ['$scope', '$http', '$window', '$location', '$timeout',
-                                function ($scope,   $http,   $window,   $location,   $timeout) {
+app.controller('ProfileEditController', ['$scope', '$http', '$window', '$location', '$timeout', '$interval',
+                                function ($scope,   $http,   $window,   $location,   $timeout,   $interval) {
   // Declare variables
   $scope.user = { // Placeholder
       FullName: 'Full Name',
@@ -65,10 +65,14 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   $scope.publish = function() {
     $http.post('api/profile/save', $scope.user).then(
       function success(response) {
+        oldMessage = $scope.message;
         $scope.message = 'Saved Success';
+        $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
       },
       function error(response) {
+        oldMessage = $scope.message;
         $scope.message = 'Saved failed';
+        $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
       }
     );
   };
