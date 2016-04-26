@@ -2,8 +2,8 @@
  * ProfileController handles the public profile page. Gets info from server
  * to then be shown.
  */
-app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams', 
-                            function ($scope,   $http,   $window,   $routeParams) {
+app.controller('ProfileController', ['$scope', '$http', '$window', '$location', '$routeParams', 
+                            function ($scope,   $http,   $window,   $location,   $routeParams) {
   // Declare variables
   $scope.user = {
       FullName: '',
@@ -28,7 +28,7 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$routeParams
     function (response) {
       if (response.status == 204) {
         $scope.message = 'User is not found';
-        $window.location.href = '#/'
+        $location.path('/');
         
       } else if (response.data != '') {
         $scope.user = response.data;

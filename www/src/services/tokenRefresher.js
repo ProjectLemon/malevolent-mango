@@ -2,8 +2,8 @@
  * tokenRefresher refreshes the token which is used to authenticate
  * the user, ever few minutes.
  */
-app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
-                       function($interval,   $http,   $window,   toastr) {
+app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'toastr',
+                       function($interval,   $http,   $window,   $location,   toastr) {
   var refresher;
   var running = false;
   var tryOnMoreTime = 0;
@@ -57,7 +57,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
 
           if (tryOnMoreTime > 0) {
             toastr.error('Server error. Please log in again', {
-              onTap: function() {$window.location.href = '#/login'}
+              onTap: function() {$location.path('/login')}
             });
             $window.sessionStorage.removeItem('token');
             stop();
@@ -71,7 +71,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
       function error(response) {
         toastr.error('Lost connection to server. Please log in again');
         $window.sessionStorage.removeItem('token', {
-              onTap: function() {$window.location.href = '#/login'}
+              onTap: function() {$location.path('/login')}
           });
         stop();
       }
