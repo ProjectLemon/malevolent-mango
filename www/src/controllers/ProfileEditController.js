@@ -2,8 +2,8 @@
  * ProfileEditController handles the edit page for the user profile.
  * Will get info from server, handle edits, and then push changes back to server
  */
-app.controller('ProfileEditController', ['$scope', '$http', '$window', '$location', '$timeout', '$interval',
-                                function ($scope,   $http,   $window,   $location,   $timeout,   $interval) {
+app.controller('ProfileEditController', ['$scope', '$http', '$window', '$location', '$timeout', '$interval', 'tokenRefresher',
+                                function ($scope,   $http,   $window,   $location,   $timeout,   $interval,   tokenRefresher) {
   // Declare variables
   $scope.user = { // Placeholder
       FullName: 'Full Name',
@@ -20,6 +20,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   $scope.message = '';
   $scope.currentPDF = 0;
   $scope.saved = true;
+  $scope.logButton = {path: '#/', title: 'Log out'};
   $scope.loading = {header: false, icon: false, pdf: false};
   $scope.maxLength = {
     fullName: 70,
@@ -53,8 +54,6 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
     }
   };
 
-
-
   /* Do a http request to server*/
   $http.get('/api/profile/get-edit').then(
 
@@ -84,20 +83,35 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
 
   /* Publish changes to server */
   $scope.publish = function() {
-    $http.post('api/profile/save', $scope.user).then(
-      function success(response) {
-        var oldMessage = $scope.message;
-        $scope.message = 'Saved Success';
-        $scope.saved = true;
-        $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
-      },
-      function error(response) {
-        var oldMessage = $scope.message;
-        $scope.message = 'Saved failed';
-        $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
-      }
-    );
-  };  
+    if ($scope.logButton.title == 'Log in') { // TODO Fix temp hack solution
+      $location.path('/login');
+      
+    } else {
+      
+      $http.post('api/profile/save', $scope.user).then(
+        function success(response) {
+          var oldMessage = $scope.message;
+          $scope.message = 'Saved Success';
+          $scope.saved = true;
+          $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
+        },
+        function error(response) {
+          var oldMessage = $scope.message;
+          $scope.message = 'Saved failed';
+          $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
+        }
+      );
+    }
+  };
+  
+  /* To happen if needing to log in again */
+  tokenRefresher.subscribeOnReloginEvent($scope, function() {
+    $scope.logButton.path = '#/login';
+    $scope.logButton.title = 'Log in';
+    $scope.message = 'You have been logged out. Please log in again';
+  });
+  
+  
 
   $scope.changeBackground = function(response) {
     $scope.user.ProfileHeader = response.data;

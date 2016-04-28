@@ -2,8 +2,8 @@
  * tokenRefresher refreshes the token which is used to authenticate
  * the user, ever few minutes.
  */
-app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'toastr',
-                       function($interval,   $http,   $window,   $location,   toastr) {
+app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', '$rootScope', 'toastr',
+                       function($interval,   $http,   $window,   $location,   $rootScope,   toastr) {
   var refresher;
   var running = false;
   var tryOnMoreTime = 0;
@@ -61,6 +61,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
             });
             $window.sessionStorage.removeItem('token');
             stop();
+            $rootScope.$emit('refreshtoken-relogin'); // trigger relogin event for all subscribers
 
           } else {
             tryOnMoreTime++;
@@ -74,6 +75,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
               onTap: function() {$location.path('/login')}
           });
         stop();
+        $rootScope.$emit('refreshtoken-relogin'); // trigger relogin event for all subscribers
       }
     )
   };
@@ -84,12 +86,21 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', 'to
   var isRunning = function() {
     return running;
   };
+  
+  /**
+   * Adds a callback to whenever the relogin event is triggered
+   */
+  var subscribeOnReloginEvent = function(scope, callback) {
+      var handler = $rootScope.$on('refreshtoken-relogin', callback);
+      scope.$on('$destroy', handler);
+  };
 
 
   return {
     start: start,
     stop: stop,
     refresh: refresh,
-    isRunning: isRunning
+    isRunning: isRunning,
+    subscribeOnReloginEvent: subscribeOnReloginEvent
   };
 }]);
