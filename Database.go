@@ -84,6 +84,8 @@ func (dbi *DatabaseInterface) UniversalLookup(phrase string) (bool, error) {
 	tables["UserSession"] = []string{"SessionKey", "UserId", "LoginTime", "LastSeenTime"}
 	tables["UserContent"] = []string{"UserId", "FullName", "Phone", "EMail", "ProfileIcon", "ProfileHeader", "Description", "PDFs"}
 
+	//TODO: This could probably be made more effective if we scanned
+	//through UserContent first since that's where collisions are most likely to occur
 	for tableName, columnNames := range tables {
 		for i := 0; i < len(columnNames); i++ {
 			rows, err := dbi.DB.Query("SELECT * FROM "+tableName+" WHERE "+columnNames[i]+"=?", phrase)
@@ -103,7 +105,7 @@ func (dbi *DatabaseInterface) UniversalLookup(phrase string) (bool, error) {
 //LookupUser sends a query to the database for the specified
 //username and password hash. Returns error if query failed
 func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
-	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = ?", user.Email)
+	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE EMail = ? OR UserId=?", user.Email, user.UserID)
 	if err != nil {
 		fmt.Println(err)
 	}
