@@ -65,6 +65,11 @@ func (dbi *DatabaseInterface) OpenConnection() error {
 		return err
 	}
 	dbi.DB = db
+
+	//Setup tables, if tables already exists, sql api will just throw away the query
+	dbi.DB.Exec("CREATE TABLE `UserSession` (`SessionKey` varchar(512) COLLATE utf8_unicode_ci NOT NULL,`UserId` varchar(128) COLLATE utf8_unicode_ci NOT NULL,`LoginTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,`LastSeenTime` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00') ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;")
+	dbi.DB.Exec("CREATE TABLE `Users` (`EMail` varchar(80) COLLATE utf8_unicode_ci NOT NULL,`UserId` varchar(128) COLLATE utf8_unicode_ci DEFAULT '',`Password` varchar(512) COLLATE utf8_unicode_ci DEFAULT '',`PasswordSalt` varchar(512) COLLATE utf8_unicode_ci DEFAULT NULL,PRIMARY KEY (`EMail`),UNIQUE KEY `EMail` (`EMail`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;")
+	dbi.DB.Exec("CREATE TABLE `UserContent` (`UserId` varchar(128) COLLATE utf8_unicode_ci NOT NULL,`FullName` varchar(70) COLLATE utf8_unicode_ci NOT NULL,`Phone` varchar(50) COLLATE utf8_unicode_ci NOT NULL,`EMail` varchar(80) COLLATE utf8_unicode_ci NOT NULL,`ProfileIcon` varchar(150) COLLATE utf8_unicode_ci NOT NULL,`ProfileHeader` varchar(150) COLLATE utf8_unicode_ci NOT NULL,`Description` varchar(360) COLLATE utf8_unicode_ci NOT NULL,`PublicName` varchar(80) COLLATE utf8_unicode_ci NOT NULL,`PDFs` varchar(20000) COLLATE utf8_unicode_ci NOT NULL DEFAULT '') ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;")
 	return nil
 }
 
@@ -145,6 +150,12 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 	return err
 }
 
+//UpdatePublicName overwrites the PublicName for the user in the database
+func (dbi *DatabaseInterface) UpdatePublicName(uc *UserContents, user *User) error {
+	_, err := dbi.DB.Exec("UPDATE UserContent set PublicName=? WHERE UserId=?", uc.PublicName, user.UserID)
+	return err
+}
+
 //GetUserContents looks up, and return, user content in database
 func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserContents) (*UserContents, error) {
 	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE UserId=?", uid)
@@ -164,6 +175,7 @@ func (dbi *DatabaseInterface) GetUserContents(uid string, userContent *UserConte
 			&userContent.ProfileIcon,
 			&userContent.ProfileHeader,
 			&userContent.Description,
+			&userContent.PublicName,
 			&jsonField)
 		if err != nil {
 			fmt.Println(err)

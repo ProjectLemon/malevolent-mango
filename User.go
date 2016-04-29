@@ -32,6 +32,7 @@ type UserContents struct {
 	ProfileIcon   string
 	ProfileHeader string
 	Description   string
+	PublicName    string
 	PDFs          []PDF
 }
 
