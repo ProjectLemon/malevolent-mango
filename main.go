@@ -13,7 +13,6 @@ import (
 	"net/mail"
 	"os"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strings"
 	"time"
