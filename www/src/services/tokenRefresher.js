@@ -2,8 +2,8 @@
  * tokenRefresher refreshes the token which is used to authenticate
  * the user, ever few minutes.
  */
-app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
-                       function($interval,   $http,   $window,   toastr) {
+app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', '$rootScope', 'toastr',
+                       function($interval,   $http,   $window,   $location,   $rootScope,   toastr) {
   var refresher;
   var running = false;
   var tryOnMoreTime = 0;
@@ -12,7 +12,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
   /**
    * start starts the refreshing of the token
    */
-  start = function() {
+  var start = function() {
     if (!running && $window.sessionStorage.getItem('token') != undefined) {
       refresher = $interval(this.refresh, .1*60*1000);//4*60*1000); // every 4 minutes
       running = true;
@@ -23,7 +23,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
    * stop stops the refreshing of the token. Returns true is sucessful,
    * otherwise false.
    */
-  stop = function() {
+  var stop = function() {
     tryOnMoreTime = 0;
     if (running) {
       running = false;
@@ -36,7 +36,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
   /**
    * refresh makes a one time refresh of the token
    */
-  refresh = function() {
+  var refresh = function() {
     $http.get('/api/refreshtoken').then(
       function success(response) {
         /* The response object has these properties:
@@ -57,10 +57,11 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
 
           if (tryOnMoreTime > 0) {
             toastr.error('Server error. Please log in again', {
-              onTap: function() {$window.location.href = '#/login'}
+              onTap: function() {$location.path('/login')}
             });
             $window.sessionStorage.removeItem('token');
             stop();
+            $rootScope.$emit('refreshtoken-relogin'); // trigger relogin event for all subscribers
 
           } else {
             tryOnMoreTime++;
@@ -71,9 +72,10 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
       function error(response) {
         toastr.error('Lost connection to server. Please log in again');
         $window.sessionStorage.removeItem('token', {
-              onTap: function() {$window.location.href = '#/login'}
+              onTap: function() {$location.path('/login')}
           });
         stop();
+        $rootScope.$emit('refreshtoken-relogin'); // trigger relogin event for all subscribers
       }
     )
   };
@@ -81,8 +83,16 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
   /**
    * isRunning returns true if tokenRefresher is running, false, otherwise
    */
-  isRunning = function() {
+  var isRunning = function() {
     return running;
+  };
+  
+  /**
+   * Adds a callback to whenever the relogin event is triggered
+   */
+  var subscribeOnReloginEvent = function(scope, callback) {
+      var handler = $rootScope.$on('refreshtoken-relogin', callback);
+      scope.$on('$destroy', handler);
   };
 
 
@@ -90,6 +100,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', 'toastr',
     start: start,
     stop: stop,
     refresh: refresh,
-    isRunning: isRunning
+    isRunning: isRunning,
+    subscribeOnReloginEvent: subscribeOnReloginEvent
   };
 }]);

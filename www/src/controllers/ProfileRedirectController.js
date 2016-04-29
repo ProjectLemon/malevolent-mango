@@ -1,11 +1,11 @@
 /**
  * Redirects users trying to navigate to a unused url: #/profile
  */
-app.controller('ProfileRedirectController', ['$window', 
-                                    function ($window) {
+app.controller('ProfileRedirectController', ['$window', '$location',
+                                    function ($window,   $location) {
   if ($window.sessionStorage.token) {
-    $window.location.href = '#/profile/edit';
+    $location.path('#/profile/edit');
   } else {
-    $window.location.href = '/';
+    $location.path('/');
   }
 }]);

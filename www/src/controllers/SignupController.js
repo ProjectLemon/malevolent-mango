@@ -1,8 +1,8 @@
 /**
  * SignupController handles the signup form which creates a new user
  */
-app.controller('SignupController', ['$scope', '$http', '$window', 'tokenRefresher', 
-                           function ($scope,   $http,   $window,   tokenRefresher) {
+app.controller('SignupController', ['$scope', '$http', '$window', '$location', 'tokenRefresher', 
+                           function ($scope,   $http,   $window,   $location,   tokenRefresher) {
   // Declare variables
   $scope.user = {};
   $scope.message = '';
@@ -31,7 +31,7 @@ app.controller('SignupController', ['$scope', '$http', '$window', 'tokenRefreshe
               $scope.message = 'Logged in';
               tokenRefresher.start();
               
-              $window.location.href = '#/profile/edit';
+              $location.path('/profile/edit');
               
             } else {
               $scope.message = 'Unable to contact server';

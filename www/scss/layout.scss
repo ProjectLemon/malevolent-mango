@@ -136,7 +136,7 @@ $profile-page-width: 90rem;
   margin: auto;
   box-shadow: 0 .2rem 1rem rgba(0, 0, 0, .21);
 
-  h1, h2, p {
+  h1, h2, p, a, span {
     &[contenteditable]:focus {
       outline: none;
     }

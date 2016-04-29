@@ -1,6 +1,7 @@
 /**
  * contenteditable extends the normal html attribute by also
- * bind it to a scope variable
+ * bind it to a scope variable. Set attribute ng-model to
+ * the variable to bind to.
  */
 app.directive("contenteditable", function() {
   return {
