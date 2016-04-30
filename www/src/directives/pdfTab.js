@@ -5,10 +5,11 @@ app.directive('pdfTab', function() {
   return {
     restrict: 'EA',
     scope: {
-      title: '@'
+      current: '='
     },
     
     link: function(scope, element, attrs) {
+      
     }
   };
 });

@@ -39,11 +39,11 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
         if (newValue != oldValue) {
           $scope.saved = false;
         }
-      }, true); // true to check for value equality
+      }, true); // true to check for value equality (not reference)
     
     var preventClosingIfNotSaved = function(event) {
       if ($scope.saved == false) {
-        event.returnValue = "Warning. You have not published your changes. Leaving this page will remove all changes."
+        event.returnValue = "Warning. Leaving without publishing will remove changes."
       }
     };
     if (window.addEventListener) {
@@ -62,7 +62,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
       if (response.data != '') {
         $scope.user = response.data;
         $scope.currentPDF = 0;
-        checkIfSaved();
+        checkIfSaved(); // start checking for saves to prevent closing without saving
       }
     },
     function error(response) {
@@ -93,7 +93,9 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
           var oldMessage = $scope.message;
           $scope.message = 'Saved Success';
           $scope.saved = true;
-          $interval(function() {$scope.message = oldMessage;}, 5*1000); // 5 sec
+          
+          // Change back message after 5 seconds:
+          $interval(function() {$scope.message = oldMessage;}, 5*1000);
         },
         function error(response) {
           var oldMessage = $scope.message;
