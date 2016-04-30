@@ -57,6 +57,7 @@ func main() {
 	db = connectToDatabase()
 	go commandLineInterface(quit)
 	go SessionCleaner(quit)
+	go ImageCleaner(quit)
 	fmt.Println("Server is running!")
 	fmt.Println("Listening on PORT: " + port)
 
@@ -86,35 +87,35 @@ func main() {
 	}
 }
 
-// ---- Start of temp, for uploading files with profile ----
-//TODO: Rewrite for our purpose
+//TODO: These three functions could be merged if we got some more info from client
 func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
 
 	path, err := saveFile("img/profile-headers/", r)
 	if err != nil {
-		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte("Unable to upload file"))
+		return
 	}
 	w.Write([]byte(path))
-	fmt.Println("Upoaded header:", path)
 }
 func receiveUploadIcon(w http.ResponseWriter, r *http.Request) {
 	path, err := saveFile("img/profile-icons/", r)
 	if err != nil {
-		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte("Unable to upload file"))
 		return
 	}
 	w.Write([]byte(path))
-	fmt.Println("Uploaded icon:", path)
 }
 
 func receiveUploadPDF(w http.ResponseWriter, r *http.Request) {
 	path, err := saveFile("pdf/", r)
 	if err != nil {
-		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte("Unable to upload file"))
 		return
 	}
 	w.Write([]byte(path))
-	fmt.Println("Uploaded pdf:", path)
 }
 
 func saveFile(folder string, r *http.Request) (string, error) {
@@ -126,9 +127,7 @@ func saveFile(folder string, r *http.Request) (string, error) {
 	defer file.Close()
 	handler.Filename = sanitizeUploadFileName(handler.Filename, handler.Filename[(len(handler.Filename)-4):])
 	path := folder + handler.Filename
-	if err != nil {
-		return "", err
-	}
+
 	f, err := os.OpenFile("www/"+path, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return "", err
@@ -154,14 +153,17 @@ func sanitizeUploadFileName(name, extension string) string {
 	}
 
 	path := sanitize.Path(name)
+	path = path + extension
 	return path
 }
-
-// ---- End of temp ----
 
 //Checks the provided credentials and authenticates
 //or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
+	if db != nil {
+		return //Since the login system depends on the precense of a database
+	}
+
 	var err error
 
 	user, err := getClientBody(w, r)
@@ -172,24 +174,16 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 	passString := user.Password
 
-	//See if user is in database (if we're using one)
-	if db != nil {
-		user, err = db.LookupUser(user)
-		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("User not found"))
-			return
-		}
-	} else {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("No database present"))
+	user, err = db.LookupUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("User not found"))
 		return
 	}
 
-	//Authenticate user and provide a jwt
 	allowed := authenticatePassword(user, passString)
 	if allowed {
-		writeToken(w, r, user)
+		writeNewToken(w, r, user)
 		db.InsertUserSession(user)
 	} else {
 		w.WriteHeader(http.StatusForbidden)
@@ -197,13 +191,15 @@ func login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//This function will evaluate the user token and if valid provide
+//the client with a new one. Valid for 5 minutes.
 func refreshToken(w http.ResponseWriter, r *http.Request) {
 	user, err := handleToken(w, r)
 	if err != nil {
 		return
 	}
 
-	writeToken(w, r, user)
+	writeNewToken(w, r, user)
 	err = db.UpdateUserSession(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -243,7 +239,9 @@ func register(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
-	user.UserID = randBase64String(64)
+
+	//64 and 128 is a result of Database limitations and security recomendations
+	user.UserID = randBase64String(64) //TODO: This should include a unique check
 	user.Salt = randBase64String(128)
 
 	//Since the code will be run by a raspberry pi, 65536 is the best
@@ -260,7 +258,7 @@ func register(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("User already registered"))
 			return
 		}
-		writeToken(w, r, user)
+		writeNewToken(w, r, user)
 		db.InsertUserSession(user)
 	}
 }
@@ -343,7 +341,6 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	userContent := new(UserContents)
 
-	//Parse json into UserContent struct
 	err = json.Unmarshal(body, userContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -364,6 +361,12 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		w.Write([]byte(err.Error()))
 		return
+	}
+	publicName := strings.ToLower(userContent.FullName)
+	nameInDb, _ := db.UniversalLookup(publicName)
+	if nameInDb {
+	} else {
+		//db.UpdateUser(user)
 	}
 }
 
@@ -391,7 +394,6 @@ func randBase64String(n int) string {
 //Takes the request from the client and parses the json
 //inside into a user struct which is being returned
 func getClientBody(w http.ResponseWriter, r *http.Request) (*User, error) {
-	//Read json from client
 	body, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -399,7 +401,6 @@ func getClientBody(w http.ResponseWriter, r *http.Request) (*User, error) {
 	}
 	user := new(User)
 
-	//Parse json into User struct
 	err = json.Unmarshal(body, user)
 	if err != nil {
 		return nil, err
@@ -413,6 +414,9 @@ func getClientBody(w http.ResponseWriter, r *http.Request) (*User, error) {
 
 //Validates an email provided by the user
 func validateEmail(email string) error {
+	if len(email) >= 80 {
+		return errors.New("Email can be no more than 80 chars in length")
+	}
 	_, err := mail.ParseAddress(email)
 	if err != nil {
 		return err
@@ -450,7 +454,7 @@ func handleToken(w http.ResponseWriter, r *http.Request) (*User, error) {
 	return user, nil
 }
 
-//Validates a token
+//Validates a token's signing method, userID and expiration date
 func validateToken(user *User) (bool, *jwt.Token) {
 	token, err := jwt.Parse(user.Session.SessionKey, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -476,7 +480,7 @@ func validateToken(user *User) (bool, *jwt.Token) {
 }
 
 //Generates a token and writes it to the client
-func writeToken(w http.ResponseWriter, r *http.Request, user *User) {
+func writeNewToken(w http.ResponseWriter, r *http.Request, user *User) {
 	token, err := generateToken(user.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -525,6 +529,6 @@ func closeServer() {
 	if db != nil {
 		db.CloseConnection()
 	}
-	close(quit)
+	close(quit) //Exits all runnign go routines
 	os.Exit(0)
 }
