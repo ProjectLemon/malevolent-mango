@@ -472,7 +472,7 @@ func getClientBody(w http.ResponseWriter, r *http.Request) (*User, error) {
 	}
 	err = validateEmail(user.Email)
 	if err != nil {
-		user.Email = ""
+		return nil, err
 	}
 	return user, nil
 }
