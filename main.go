@@ -76,9 +76,7 @@ func main() {
 	http.HandleFunc("/api/profile/get-edit", getProfileEdit)
 	http.HandleFunc("/api/profile/get-view/", getProfileView)
 
-	http.HandleFunc("/api/upload/pdf", receiveUploadPDF)
-	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
-	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
+	http.HandleFunc("/api/upload/", receiveUpload)
 
 	//Setup gzip for everything
 	fs := http.FileServer(http.Dir("www"))
@@ -94,34 +92,27 @@ func main() {
 }
 
 //TODO: These three functions could be merged if we got some more info from client
-func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
+func receiveUpload(w http.ResponseWriter, r *http.Request) {
+	directories := make(map[string]string)
+	directories["pdf"] = "pdf/"
+	directories["profile-header"] = "img/profile-headers/"
+	directories["profile-icon"] = "img/profile-icons/"
+	requestURLParts := strings.Split(r.RequestURI, "/")
+	if len(requestURLParts) < 2 {
+		return
+	}
 
-	path, err := saveFile("img/profile-headers/", r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("Unable to upload file"))
+	if serverPath, ok := directories[requestURLParts[len(requestURLParts)-1]]; ok {
+		clientPath, err := saveFile(serverPath, r)
+		if err != nil {
+			w.WriteHeader(http.StatusNotAcceptable)
+			w.Write([]byte("Unable to upload file"))
+			return
+		}
+		w.Write([]byte(clientPath))
+	} else {
 		return
 	}
-	w.Write([]byte(path))
-}
-func receiveUploadIcon(w http.ResponseWriter, r *http.Request) {
-	path, err := saveFile("img/profile-icons/", r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("Unable to upload file"))
-		return
-	}
-	w.Write([]byte(path))
-}
-
-func receiveUploadPDF(w http.ResponseWriter, r *http.Request) {
-	path, err := saveFile("pdf/", r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("Unable to upload file"))
-		return
-	}
-	w.Write([]byte(path))
 }
 
 func saveFile(folder string, r *http.Request) (string, error) {
@@ -259,8 +250,13 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//64 and 128 is a result of Database limitations and security recomendations
-	user.UserID = randBase64String(64) //TODO: This should include a unique check
-	user.Salt = randBase64String(128)
+	for {
+		user.UserID = randBase64String(64)
+		user.Salt = randBase64String(128)
+		if db.UniqueIdentifier(user.UserID) && db.UniqueIdentifier(user.Salt) {
+			break
+		}
+	}
 
 	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), _passwordCost, 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64(_passwordCost, []byte(passwordHash), []byte(user.Salt))
@@ -272,8 +268,21 @@ func register(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("User already registered"))
 		return
 	}
+
+	//Because we don't want the user to reneter email
+	userContent := new(UserContents)
+	userContent.EMail = user.Email
+	userContent.ProfileHeader = "img/backgroundDefault.png"
+	userContent.ProfileIcon = "img/profileDefault.png"
+	userContent.FullName = "Full Name"
+	userContent.Description = "Descriotion"
+	userContent.Phone = "Phone"
+	userContent.UserID = user.UserID
+	db.UpdateUserContent(user.UserID, userContent)
+
 	writeNewToken(w, r, user)
 	db.InsertUserSession(user)
+
 }
 
 //Generates a KDF from the provided password and user salt and compares them
@@ -297,6 +306,10 @@ func getProfileView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	publicName := requestURLParts[len(requestURLParts)-1]
+	if publicName == "" {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("User not found"))
+	}
 	uid, err := db.GetUserIDFromPublicName(publicName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -551,7 +564,7 @@ func writeNewToken(w http.ResponseWriter, r *http.Request, user *User) {
 
 func usingDatabase(w http.ResponseWriter) bool {
 	if db == nil {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("No database associated"))
 		return false
 	}
