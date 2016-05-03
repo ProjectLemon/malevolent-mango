@@ -113,6 +113,10 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
       $location.path('/login');
       
     } else {
+      if($scope.validContent() !== true) {
+        toastr.error('Fields are too long')
+        return
+      }
       
       $http.post('api/profile/save', $scope.user).then(
         function success(response) {
@@ -174,4 +178,9 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   $scope.endUploadPDF = function(response) {
     $scope.loading.pdf = false;
   };
+  $scope.validContent = function() {
+    return ($scope.user.FullName.length < $scope.maxLength.fullName &&
+           $scope.user.FullName.Phone < $scope.maxLength.phone &&
+           $scope.user.EMail.length < $scope.maxLength.email)
+  }
 }]);

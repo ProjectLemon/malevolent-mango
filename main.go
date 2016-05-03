@@ -30,7 +30,7 @@ import (
 const (
 	_version = 0.3
 	port     = "8080"
-	//Since the code will be run by a raspberry pi, 65536 is the best
+	//Since the code will be run by a raspberry pi, 4096 is the best
 	//we can do when it comes to cost for our key. Should be increased
 	//to 1048576 (1 << 20) when migrating to a more high end system.
 	_passwordCost = 1 << 12
@@ -439,7 +439,7 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 func generateToken(userID string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims["uid"] = userID
-	token.Claims["exp"] = time.Now().Add(time.Minute * 2).Unix()
+	token.Claims["exp"] = time.Now().Add(time.Minute * 5).Unix()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		fmt.Println(err)
