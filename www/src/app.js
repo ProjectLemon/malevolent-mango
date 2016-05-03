@@ -29,7 +29,7 @@ app.config(['$routeProvider', '$locationProvider',
       controller:'ProfileEditController',
       templateUrl:'../views/profileEdit.html'
     })
-    .when('/profile/:userID', {
+    .when('/profile/:publicName', {
       controller:'ProfileController',
       templateUrl:'../views/profile.html'
     })

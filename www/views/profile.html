@@ -1,6 +1,11 @@
 ﻿<section class="profile-content">
 
   <header class="profile-header" background-image="{{ user.ProfileHeader }}" path="user.ProfileHeader">
+    <a class="log-button" href="#/login">
+      Log in
+    </a>
+    
+    
     <img class="profile-icon" src="{{ user.ProfileIcon }}" alt="Profile picture">
     <h1 class="fullname">{{ user.FullName }}</h1>
 
@@ -17,7 +22,7 @@
     <p class="description">{{ user.Description }}</p>
   
     <div class="profile-tabs">
-      <a href="#" class="tab" ng-class="{unfocus: n!=0}" ng-repeat="(n, pdf) in user.PDFs">
+      <a class="tab" ng-class="{unfocus: n != currentPDF}" ng-repeat="(n, pdf) in user.PDFs" ng-click="changePDF(n)">
         <svg class="tab-left-side" width="50.486px" height="44.204px" viewBox="0 0 50.486 44.204" enable-background="new 0 0 50.486 44.204">
           <path fill="#373839" d="M50.486-0.001v44.205c-25.206,0-44.307,0-50.486,0c0.233,0,0.484,0,0.757,0 C37.293,44.204,13.329,0.045,50.486-0.001z"/>
         </svg><!--

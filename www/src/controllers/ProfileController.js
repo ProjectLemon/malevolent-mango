@@ -17,17 +17,17 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$location', 
       PDFs: [
       ]
   };
-  $scope.currentPDF = 0;
+  $scope.currentPDF = -1;
   $scope.message = '';
 
 
   //Do a http request to server
-  $http.post('/api/profile/get-view', {UserID: $routeParams.userID}).then(
+  $http.get('/api/profile/get-view/'+$routeParams.publicName).then(
     // If success
     // Get user information from server and puts it in the user variable
     function (response) {
       if (response.status == 204) { // No Content
-        $scope.message = 'User '+$routeParams.userID+' is not found';
+        $scope.message = 'User '+$routeParams.publicName+' is not found';
         toastr.warning($scope.message);
         $location.path('/');
         
@@ -46,5 +46,9 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$location', 
       toastr.warning($scope.message);
       $location.path('/');
     }
-  )
+  );
+  
+  $scope.changePDF = function(n) {
+    $scope.currentPDF = n;
+  };
 }]);

@@ -2,8 +2,8 @@
  * ProfileEditController handles the edit page for the user profile.
  * Will get info from server, handle edits, and then push changes back to server
  */
-app.controller('ProfileEditController', ['$scope', '$http', '$window', '$location', '$timeout', '$interval', 'tokenRefresher',
-                                function ($scope,   $http,   $window,   $location,   $timeout,   $interval,   tokenRefresher) {
+app.controller('ProfileEditController', ['$scope', '$http', '$window', '$location', '$timeout', '$interval', 'tokenRefresher', 'toastr',
+                                function ($scope,   $http,   $window,   $location,   $timeout,   $interval,   tokenRefresher,   toastr) {
   // Declare variables
   $scope.user = { // Placeholder
       FullName: 'Full Name',
@@ -20,7 +20,6 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   $scope.message = '';
   $scope.currentPDF = -1;
   $scope.saved = true;
-  $scope.logButton = {path: '#/', title: 'Log out'};
   $scope.loading = {header: false, icon: false, pdf: false};
   $scope.maxLength = {
     fullName: 70,
@@ -31,6 +30,27 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
     profileHeader: 360,
     pdfs: 21844
   }
+  $scope.logButton = {title: 'Log out', 
+    click: function() {
+      if ($window.sessionStorage.getItem('token') != null) {
+        
+        $http.get('/api/logout').then(
+          function success(response) {
+            $window.sessionStorage.removeItem('token');
+            toastr.success('You have been logged out');
+            $location.path('/');
+          },
+          function error(response) {
+            $window.sessionStorage.removeItem('token');
+            toastr.success('You have been logged out');
+            $location.path('/');
+          }
+        );
+      } else {
+        $location.path('/login');
+      }
+    }
+  };
   
 
   /* Notify user that changes not saved (on window close) */
@@ -71,6 +91,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
 
       } else if (response.status == 400) {
         $scope.message = 'You are not logged in';
+        toastr.warning($scope.message+'. Please log in to edit profile');
         $location.path('/'); // return to start page
 
       } else if (response.status == 413) {
@@ -83,7 +104,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
 
   /* Publish changes to server */
   $scope.publish = function() {
-    if ($scope.logButton.title == 'Log in') { // TODO Fix temp hack solution
+    if ($scope.logButton.click == 'login()') {
       $location.path('/login');
       
     } else {
@@ -108,7 +129,6 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   
   /* To happen if needing to log in again */
   tokenRefresher.subscribeOnReloginEvent($scope, function() {
-    $scope.logButton.path = '#/login';
     $scope.logButton.title = 'Log in';
     $scope.message = 'You have been logged out. Please log in again';
   });
@@ -117,38 +137,36 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   $scope.changePDF = function(n) {
     $scope.currentPDF = n;
   };
-  
-
   $scope.changeBackground = function(response) {
     $scope.user.ProfileHeader = response.data;
-  }
+  };
   $scope.changeProfileIcon = function(response) {
     $scope.user.ProfileIcon = response.data //This is never run?
-  }
+  };
   $scope.addPDF = function(response) {
     if ($scope.user.PDFs == null) {
       $scope.user.PDFs = [];
     }
     $scope.user.PDFs.push({Title: 'Unnamed', Path: response.data});
     $scope.currentPDF = $scope.user.PDFs.length-1;
-  }
+  };
 
   $scope.startUploadHeader = function(response) {
     $scope.loading.header = true;
-  }
+  };
   $scope.startUploadIcon = function(response) {
     $scope.loading.icon = true;
-  }
+  };
   $scope.startUploadPdf = function(response) {
     $scope.loading.pdf = true;
-  }
+  };
   $scope.endUploadHeader = function(response) {
     $scope.loading.header = false;
-  }
+  };
   $scope.endUploadIcon = function(response) {
     $scope.loading.icon = false;
-  }
+  };
   $scope.endUploadPDF = function(response) {
     $scope.loading.pdf = false;
-  }
+  };
 }]);
