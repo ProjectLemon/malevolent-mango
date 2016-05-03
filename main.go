@@ -76,9 +76,7 @@ func main() {
 	http.HandleFunc("/api/profile/get-edit", getProfileEdit)
 	http.HandleFunc("/api/profile/get-view/", getProfileView)
 
-	http.HandleFunc("/api/upload/pdf", receiveUploadPDF)
-	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
-	http.HandleFunc("/api/upload/profile-icon", receiveUploadIcon)
+	http.HandleFunc("/api/upload/", receiveUpload)
 
 	//Setup gzip for everything
 	fs := http.FileServer(http.Dir("www"))
@@ -94,34 +92,27 @@ func main() {
 }
 
 //TODO: These three functions could be merged if we got some more info from client
-func receiveUploadHeader(w http.ResponseWriter, r *http.Request) {
+func receiveUpload(w http.ResponseWriter, r *http.Request) {
+	directories := make(map[string]string)
+	directories["pdf"] = "pdf/"
+	directories["profile-header"] = "img/profile-headers/"
+	directories["profile-icon"] = "img/profile-icons/"
+	requestURLParts := strings.Split(r.RequestURI, "/")
+	if len(requestURLParts) < 2 {
+		return
+	}
 
-	path, err := saveFile("img/profile-headers/", r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("Unable to upload file"))
+	if serverPath, ok := directories[requestURLParts[len(requestURLParts)-1]]; ok {
+		clientPath, err := saveFile(serverPath, r)
+		if err != nil {
+			w.WriteHeader(http.StatusNotAcceptable)
+			w.Write([]byte("Unable to upload file"))
+			return
+		}
+		w.Write([]byte(clientPath))
+	} else {
 		return
 	}
-	w.Write([]byte(path))
-}
-func receiveUploadIcon(w http.ResponseWriter, r *http.Request) {
-	path, err := saveFile("img/profile-icons/", r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("Unable to upload file"))
-		return
-	}
-	w.Write([]byte(path))
-}
-
-func receiveUploadPDF(w http.ResponseWriter, r *http.Request) {
-	path, err := saveFile("pdf/", r)
-	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		w.Write([]byte("Unable to upload file"))
-		return
-	}
-	w.Write([]byte(path))
 }
 
 func saveFile(folder string, r *http.Request) (string, error) {
@@ -315,6 +306,10 @@ func getProfileView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	publicName := requestURLParts[len(requestURLParts)-1]
+	if publicName == "" {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("User not found"))
+	}
 	uid, err := db.GetUserIDFromPublicName(publicName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
