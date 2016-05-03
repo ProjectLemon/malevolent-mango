@@ -41,7 +41,7 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$location', 
       if (response.status == 401) {
         $scope.message = 'You don\'t have permission to access this content'; 
       } else {
-        $scope.message = 'User is not found'; 
+        $scope.message = 'User is '+$routeParams.publicName+' not found'; 
       }
       toastr.warning($scope.message);
       $location.path('/');

@@ -18,7 +18,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
       ]
   };
   $scope.message = '';
-  $scope.currentPDF = -1;
+  $scope.currentPDF = -1; // no pdfs in array
   $scope.saved = true;
   $scope.loading = {header: false, icon: false, pdf: false};
   $scope.maxLength = {
@@ -81,13 +81,18 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
     function success(response) {
       if (response.data != '') {
         $scope.user = response.data;
-        $scope.currentPDF = 0;
+        if ($scope.user.PDFs.length > 0) {
+          $scope.currentPDF = 0;
+        }
         checkIfSaved(); // start checking for saves to prevent closing without saving
       }
     },
     function error(response) {
       if (response.status == 401) {
         $scope.message = 'You don\'t have permission to access this content';
+        toastr.warning($scope.message+'. Please log in to edit profile');
+        $location.path('/login');
+        
 
       } else if (response.status == 400) {
         $scope.message = 'You are not logged in';
