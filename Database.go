@@ -102,6 +102,22 @@ func (dbi *DatabaseInterface) UniversalLookup(phrase string) (bool, error) {
 	return false, nil
 }
 
+//UniqueIdentifier queries the database for the given string in the
+//fields UserId and Salt since they have to be unique. Return true if not present
+func (dbi *DatabaseInterface) UniqueIdentifier(identifier string) bool {
+	rows, err := dbi.DB.Query("SELECT * FROM Users WHERE UserId=? or PasswordSalt=?", identifier, identifier)
+	if err != nil {
+		fmt.Println(err)
+		return true
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		return false
+	}
+	return true
+}
+
 //LookupUser sends a query to the database for the specified
 //username and password hash. Returns error if query failed
 func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {

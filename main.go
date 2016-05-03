@@ -259,8 +259,13 @@ func register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//64 and 128 is a result of Database limitations and security recomendations
-	user.UserID = randBase64String(64) //TODO: This should include a unique check
-	user.Salt = randBase64String(128)
+	for {
+		user.UserID = randBase64String(64)
+		user.Salt = randBase64String(128)
+		if db.UniqueIdentifier(user.UserID) && db.UniqueIdentifier(user.Salt) {
+			break
+		}
+	}
 
 	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), _passwordCost, 8, 1, 128)
 	passwordHash64 := scryptauth.EncodeBase64(_passwordCost, []byte(passwordHash), []byte(user.Salt))
@@ -272,8 +277,21 @@ func register(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("User already registered"))
 		return
 	}
+
+	//Because we don't want the user to reneter email
+	userContent := new(UserContents)
+	userContent.EMail = user.Email
+	userContent.ProfileHeader = "img/backgroundDefault.png"
+	userContent.ProfileIcon = "img/profileDefault.png"
+	userContent.FullName = "Full Name"
+	userContent.Description = "Descriotion"
+	userContent.Phone = "Phone"
+	userContent.UserID = user.UserID
+	db.UpdateUserContent(user.UserID, userContent)
+
 	writeNewToken(w, r, user)
 	db.InsertUserSession(user)
+
 }
 
 //Generates a KDF from the provided password and user salt and compares them
@@ -551,7 +569,7 @@ func writeNewToken(w http.ResponseWriter, r *http.Request, user *User) {
 
 func usingDatabase(w http.ResponseWriter) bool {
 	if db == nil {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("No database associated"))
 		return false
 	}
