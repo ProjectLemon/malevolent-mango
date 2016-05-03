@@ -8,18 +8,18 @@ app.directive('pdfViewer', ['$compile', function($compile) {
   return {
     restrict: 'E',
     scope: {
-      pdfs: '@',
-      current: '='
+      pdfs: '=',
+      current: '@'
     },
 
     link: function(scope, element, attrs) {
 
       var currentElement = element;
-      scope.$parent.$watch(scope.pdfs, function(newValue, oldValue) {
+      scope.$parent.$watch(scope.current, function(newValue, oldValue) {
         var html;
-        if (newValue && newValue.length > 0 && newValue[scope.current] != null) {
+        if (scope.pdfs && scope.pdfs.length > 0 && scope.pdfs[newValue] != null) {
           
-          var pdf = newValue[scope.current];
+          var pdf = scope.pdfs[newValue];
           html = '<embed src="'+pdf.Path+'" type="application/pdf">'
 
         } else {

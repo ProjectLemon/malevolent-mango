@@ -18,7 +18,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
       ]
   };
   $scope.message = '';
-  $scope.currentPDF = 0;
+  $scope.currentPDF = -1;
   $scope.saved = true;
   $scope.logButton = {path: '#/', title: 'Log out'};
   $scope.loading = {header: false, icon: false, pdf: false};
@@ -113,6 +113,10 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
     $scope.message = 'You have been logged out. Please log in again';
   });
   
+  
+  $scope.changePDF = function(n) {
+    $scope.currentPDF = n;
+  };
   
 
   $scope.changeBackground = function(response) {
