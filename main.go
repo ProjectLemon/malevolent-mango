@@ -9,11 +9,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	pseudoRand "math/rand"
 	"net/http"
 	"net/mail"
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -27,6 +29,10 @@ import (
 const (
 	_version = 0.3
 	port     = "8080"
+	//Since the code will be run by a raspberry pi, 65536 is the best
+	//we can do when it comes to cost for our key. Should be increased
+	//to 1048576 (1 << 20) when migrating to a more high end system.
+	_passwordCost = 1 << 12
 )
 
 var (
@@ -68,7 +74,7 @@ func main() {
 	http.HandleFunc("/api/refreshtoken", refreshToken)
 	http.HandleFunc("/api/profile/save", saveProfile)
 	http.HandleFunc("/api/profile/get-edit", getProfileEdit)
-	http.HandleFunc("/api/profile/get-view", getProfileView)
+	http.HandleFunc("/api/profile/get-view/", getProfileView)
 
 	http.HandleFunc("/api/upload/pdf", receiveUploadPDF)
 	http.HandleFunc("/api/upload/profile-header", receiveUploadHeader)
@@ -160,8 +166,8 @@ func sanitizeUploadFileName(name, extension string) string {
 //Checks the provided credentials and authenticates
 //or denies the user.
 func login(w http.ResponseWriter, r *http.Request) {
-	if db != nil {
-		return //Since the login system depends on the precense of a database
+	if !usingDatabase(w) {
+		return
 	}
 
 	var err error
@@ -194,6 +200,10 @@ func login(w http.ResponseWriter, r *http.Request) {
 //This function will evaluate the user token and if valid provide
 //the client with a new one. Valid for 5 minutes.
 func refreshToken(w http.ResponseWriter, r *http.Request) {
+	if !usingDatabase(w) {
+		return
+	}
+
 	user, err := handleToken(w, r)
 	if err != nil {
 		return
@@ -212,6 +222,10 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 //Removes the active session for the user in database which will
 //make the rest of the code treat the user as not logged in
 func logout(w http.ResponseWriter, r *http.Request) {
+	if !usingDatabase(w) {
+		return
+	}
+
 	user, err := handleToken(w, r)
 	if err != nil {
 		return
@@ -233,6 +247,10 @@ func logout(w http.ResponseWriter, r *http.Request) {
 
 //Encrypts the users password and registers it in the database
 func register(w http.ResponseWriter, r *http.Request) {
+	if !usingDatabase(w) {
+		return
+	}
+
 	user, err := getClientBody(w, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -244,51 +262,63 @@ func register(w http.ResponseWriter, r *http.Request) {
 	user.UserID = randBase64String(64) //TODO: This should include a unique check
 	user.Salt = randBase64String(128)
 
-	//Since the code will be run by a raspberry pi, 65536 is the best
-	//we can do when it comes to cost for our key. Should be increased
-	//to 1048576 (1 << 20) when migrating to a more high end system.
-	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), (1 << 16), 8, 1, 128)
-	passwordHash64 := scryptauth.EncodeBase64((1 << 16), []byte(passwordHash), []byte(user.Salt))
+	passwordHash, _ := scrypt.Key([]byte(user.Password), []byte(user.Salt), _passwordCost, 8, 1, 128)
+	passwordHash64 := scryptauth.EncodeBase64(_passwordCost, []byte(passwordHash), []byte(user.Salt))
 	user.Password = string(passwordHash64)
 
-	if db != nil {
-		err := db.AddUser(user)
-		if err != nil {
-			w.WriteHeader(http.StatusConflict)
-			w.Write([]byte("User already registered"))
-			return
-		}
-		writeNewToken(w, r, user)
-		db.InsertUserSession(user)
+	err = db.AddUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusConflict)
+		w.Write([]byte("User already registered"))
+		return
 	}
+	writeNewToken(w, r, user)
+	db.InsertUserSession(user)
 }
 
 //Generates a KDF from the provided password and user salt and compares them
 //Returns true/false if hashes match
 func authenticatePassword(user *User, password string) bool {
-	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), (1 << 16), 8, 1, 128)
-	passwordHash64 := scryptauth.EncodeBase64((1 << 16), []byte(passwordHash), []byte(user.Salt))
+	passwordHash, _ := scrypt.Key([]byte(password), []byte(user.Salt), _passwordCost, 8, 1, 128)
+	passwordHash64 := scryptauth.EncodeBase64(_passwordCost, []byte(passwordHash), []byte(user.Salt))
 	return (string(passwordHash64) == user.Password)
 
 }
 
 //Returns a profile to the client
 func getProfileView(w http.ResponseWriter, r *http.Request) {
-	user, err := getClientBody(w, r)
+	if !usingDatabase(w) {
+		return
+	}
+
+	requestURLParts := strings.Split(r.RequestURI, "/")
+	if len(requestURLParts) < 2 {
+		return
+	}
+
+	publicName := requestURLParts[len(requestURLParts)-1]
+	uid, err := db.GetUserIDFromPublicName(publicName)
 	if err != nil {
-		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	user := new(User)
+	user.UserID = uid
+	user, err = db.LookupUser(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+
 	writeUserContentToClient(w, r, user)
 }
 
 //Validates token and returns a profile to client for edit
 func getProfileEdit(w http.ResponseWriter, r *http.Request) {
-	if db == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("No database associated"))
+	if !usingDatabase(w) {
 		return
 	}
 
@@ -301,6 +331,10 @@ func getProfileEdit(w http.ResponseWriter, r *http.Request) {
 
 //Writes UserContent from database to client
 func writeUserContentToClient(w http.ResponseWriter, r *http.Request, user *User) {
+	if !usingDatabase(w) {
+		return
+	}
+
 	userContent := new(UserContents)
 	userContent, err := db.GetUserContents(user.UserID, userContent)
 	if err != nil {
@@ -309,7 +343,7 @@ func writeUserContentToClient(w http.ResponseWriter, r *http.Request, user *User
 		w.Write([]byte("No content for the specified user"))
 		return
 	}
-
+	userContent.UserID = "" //Since it potentially could be exploited if we sent uid to client
 	JSON, err := json.Marshal(userContent)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -320,11 +354,9 @@ func writeUserContentToClient(w http.ResponseWriter, r *http.Request, user *User
 	w.Write(JSON)
 }
 
-//Serves the profile into database
+//Saves the profile into database
 func saveProfile(w http.ResponseWriter, r *http.Request) {
-	if db == nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("No database associated"))
+	if !usingDatabase(w) {
 		return
 	}
 
@@ -362,13 +394,33 @@ func saveProfile(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		return
 	}
+
+	//We are using the users public name as part of their URL
+	//therefore we have to make sure it's unique or else make it unique
 	publicName := strings.ToLower(userContent.FullName)
-	nameInDb, _ := db.UniversalLookup(publicName)
+	publicName = strings.Replace(publicName, " ", "", -1)
+	nameInDb, _ := db.LookupPublicName(publicName)
 	if nameInDb {
+		//Since we want a 4 digit long number we have to do this
+		//somewhat complicated conversion from []int to string using a []byte
+		pseudoRand.Seed(time.Now().UTC().UnixNano())
+		nrExtension := pseudoRand.Perm(4)
+		temp := []byte{}
+		for i := 0; i < len(nrExtension); i++ {
+			temp = strconv.AppendInt(temp, int64(nrExtension[i]), 10)
+		}
+		strNrExtension := string(temp)
+
+		publicName += strNrExtension
+		userContent.PublicName = publicName
+		db.UpdatePublicName(userContent, user)
+
+		//cat and insert to database
 	} else {
-		//db.UpdateUser(user)
+		userContent.PublicName = publicName
+		db.UpdatePublicName(userContent, user)
 	}
-}
+} // End saveProfile
 
 //Uses the jwt-library and the secretKey to generate a signed jwt
 func generateToken(userID string) (string, error) {
@@ -495,6 +547,15 @@ func writeNewToken(w http.ResponseWriter, r *http.Request, user *User) {
 	}
 	w.WriteHeader(http.StatusAccepted)
 	w.Write(JSON)
+}
+
+func usingDatabase(w http.ResponseWriter) bool {
+	if db == nil {
+		w.WriteHeader(http.StatusNoContent)
+		w.Write([]byte("No database associated"))
+		return false
+	}
+	return true
 }
 
 //Tries to open a connection to the database
