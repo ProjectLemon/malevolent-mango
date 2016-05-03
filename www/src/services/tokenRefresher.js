@@ -14,7 +14,7 @@ app.factory('tokenRefresher', ['$interval', '$http', '$window', '$location', '$r
    */
   var start = function() {
     if (!running && $window.sessionStorage.getItem('token') != undefined) {
-      refresher = $interval(this.refresh, .1*60*1000);//4*60*1000); // every 4 minutes
+      refresher = $interval(this.refresh, 4*60*1000); // every 4 minutes
       running = true;
     }
   };
