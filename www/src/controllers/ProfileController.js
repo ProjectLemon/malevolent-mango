@@ -27,7 +27,7 @@ app.controller('ProfileController', ['$scope', '$http', '$window', '$location', 
     // Get user information from server and puts it in the user variable
     function (response) {
       if (response.status == 204) { // No Content
-        $scope.message = 'User is not found';
+        $scope.message = 'User '+$routeParams.userID+' is not found';
         toastr.warning($scope.message);
         $location.path('/');
         
