@@ -3,8 +3,8 @@
  */
 app.controller('ProfileRedirectController', ['$window', '$location',
                                     function ($window,   $location) {
-  if ($window.sessionStorage.token) {
-    $location.path('#/profile/edit');
+  if ($window.sessionStorage.getItem('token')) {
+    $location.path('/profile/edit');
   } else {
     $location.path('/');
   }
