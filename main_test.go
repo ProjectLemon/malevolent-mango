@@ -47,6 +47,27 @@ func TestValidateEmailSQLInject(t *testing.T) {
 	}
 }
 
+func TestBunchOfValidEmails(t *testing.T) {
+	validEmails := []string{"email@domain.com", "firstname.lastname@domain.com", "email@subdomain.domain.com", "firstname+lastname@domain.com", "email@domain-one.com", "email@domain.name", "email@domain.co.jp", "firstname-lastname@domain.com", "email@domain"}
+	for i := range validEmails {
+		err := validateEmail(validEmails[i])
+		if err != nil {
+			fmt.Println(err)
+			t.Fatalf("Email: " + validEmails[i] + " should be considered valid")
+		}
+	}
+}
+
+func TestBunchOfInValidEmails(t *testing.T) {
+	invalidEmails := []string{"plainaddress", "#@%^%#$@#$@#.com", "@domain.com", "Joe Smith <email@domain.com>", "email.domain.com", "email@domain@domain.com", ".email@domain.com", "email.@domain.com", "email..email@domain.com", "あいうえお@domain.com", "email@domain.com (Joe Smith)", "email@111.222.333.44444", "email@domain..com", "1234567890@domain.com", "_______@domain.com", "root@domain.com", "localhost@domain.com", "email@123.123.123.123", "root@0.0.0.0", "root@127.0.0.1", "\"email\"@domain.com"}
+	for i := range invalidEmails {
+		err := validateEmail(invalidEmails[i])
+		if err == nil {
+			t.Fatalf("Email: " + invalidEmails[i] + " should be considered invalid")
+		}
+	}
+}
+
 func TestGenerateSalt(t *testing.T) {
 	bytes := randBase64String(128)
 	if len(bytes) < 100 {
@@ -87,13 +108,14 @@ func TestUploadSanitizer(t *testing.T) {
 	path := "file-name.pdf"
 	newPath := sanitizeUploadFileName(path, path[(len(path)-4):])
 	if newPath != path {
+		fmt.Println("path: " + path + " newPath: " + newPath)
 		t.Fatalf("ERROR: Strings should be equal")
 	}
 }
 
 func TestDatabaseContains(t *testing.T) {
 	db := connectToDatabase()
-	phrase := "hola"
+	phrase := "test@test"
 	contains, err := db.UniversalLookup(phrase)
 	if err != nil {
 		fmt.Println(err)
