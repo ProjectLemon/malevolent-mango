@@ -129,6 +129,26 @@ func (dbi *DatabaseInterface) LookupUser(user *User) (*User, error) {
 	return nil, ErrNoUserFound
 }
 
+//GetUserIDFromPublicName takes a provided public name and returns the users userID
+func (dbi *DatabaseInterface) GetUserIDFromPublicName(name string) (string, error) {
+	rows, err := dbi.DB.Query("SELECT UserId FROM UserContent WHERE PublicName=?;", name)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	defer rows.Close()
+
+	publicName := new(string)
+	for rows.Next() {
+		err := rows.Scan(publicName)
+		if err != nil {
+			fmt.Println(err)
+			return "", err
+		}
+	}
+	return *publicName, nil
+}
+
 //AddUser inserts the specified user into the database
 //returns error where err == nil if everything went okay
 func (dbi *DatabaseInterface) AddUser(user *User) error {
@@ -152,9 +172,24 @@ func (dbi *DatabaseInterface) AddUser(user *User) error {
 	return err
 }
 
+//LookupPublicName will lookup the provided string inside PublicName column and perform a substring match
+func (dbi *DatabaseInterface) LookupPublicName(name string) (bool, error) {
+	rows, err := dbi.DB.Query("SELECT * FROM UserContent WHERE PublicName REGEXP ?", name)
+	if err != nil {
+		fmt.Println(err)
+		return false, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		return true, nil
+	}
+	return false, nil
+}
+
 //UpdatePublicName overwrites the PublicName for the user in the database
 func (dbi *DatabaseInterface) UpdatePublicName(uc *UserContents, user *User) error {
-	_, err := dbi.DB.Exec("UPDATE UserContent set PublicName=? WHERE UserId=?", uc.PublicName, user.UserID)
+	_, err := dbi.DB.Exec("UPDATE UserContent SET PublicName=? WHERE UserId=?;", uc.PublicName, user.UserID)
 	return err
 }
 
