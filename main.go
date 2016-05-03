@@ -14,6 +14,7 @@ import (
 	"net/mail"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -91,7 +92,7 @@ func main() {
 	}
 }
 
-//TODO: These three functions could be merged if we got some more info from client
+//Recieves a file from the client and handles saving it based on what content type
 func receiveUpload(w http.ResponseWriter, r *http.Request) {
 	directories := make(map[string]string)
 	directories["pdf"] = "pdf/"
@@ -150,7 +151,6 @@ func sanitizeUploadFileName(name, extension string) string {
 	}
 
 	path := sanitize.Path(name)
-	path = path + extension
 	return path
 }
 
@@ -485,9 +485,38 @@ func validateEmail(email string) error {
 	_, err := mail.ParseAddress(email)
 	if err != nil {
 		return err
-	} else if strings.Contains(email, "'") {
-		return errors.New("Email cannot contain '")
 	}
+	email = strings.ToLower(email)
+	parts := strings.Split(email, "@")
+	regex := regexp.MustCompile("[a-z]")
+	for i := range parts {
+		invalid := (len(regex.FindAllString(parts[i], -1))) < 1
+		if invalid {
+			return errors.New("Part must contain letters")
+		}
+	}
+
+	reservedWords := make(map[string]string)
+	reservedWords["root"] = ""
+	reservedWords["localhost"] = ""
+	reservedWords["0.0.0.0"] = ""
+	reservedWords["127.0.0.1"] = ""
+	for i := range parts {
+		if _, contains := reservedWords[parts[i]]; contains {
+			return errors.New("Email cannot contain reserved words")
+		}
+	}
+
+	allowedCharacters := regexp.MustCompile("[a-z]|[0-9]|[@._+-]") //select all characters, number and the characters @._+-
+	validChars := allowedCharacters.FindAllString(email, -1)
+	if len(validChars) != len(email) {
+		return errors.New("Disallowed characters were present")
+	}
+
+	if strings.Count(email, "@") != 1 {
+		return errors.New("Email should contain exactly one @")
+	}
+
 	return nil
 }
 
