@@ -180,7 +180,7 @@ app.controller('ProfileEditController', ['$scope', '$http', '$window', '$locatio
   };
   $scope.validContent = function() {
     return ($scope.user.FullName.length < $scope.maxLength.fullName &&
-           $scope.user.FullName.Phone < $scope.maxLength.phone &&
+           $scope.user.Phone.length < $scope.maxLength.phone &&
            $scope.user.EMail.length < $scope.maxLength.email)
   }
 }]);
